@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
     paths:
       - .github/workflows/vcs-scanner-ci.yaml
-      - components/resc-vcs-scanner/**
+      - /**
       - '!**.md'
       - '!**.png'
       - '!**.gif'
@@ -14,7 +14,7 @@ on:
     branches: [ "main" ]
     paths:
       - .github/workflows/vcs-scanner-ci.yaml
-      - components/resc-vcs-scanner/**
+      - /**
       - '!**.md'
       - '!**.png'
       - '!**.gif'
@@ -22,8 +22,8 @@ on:
   workflow_dispatch:
 
 env:
-  RESC_VCS_SCANNER_DIR: components/resc-vcs-scanner
-  RESC_COMPONENTS: components
+  RESC_VCS_SCANNER_DIR: /
+  #RESC_COMPONENTS: components
   CONTAINER_REGISTRY: rescabnamro
   IMAGE_NAME: resc-vcs-scanner
 
@@ -49,22 +49,18 @@ jobs:
 
     - name: Install test dependencies
       run: |
-        cd ${{ env.RESC_VCS_SCANNER_DIR }}
         pip install -r test-requirements.txt
 
     - name: Test with pytest
       run: |
-        cd ${{ env.RESC_VCS_SCANNER_DIR }}
         tox -e pytest
 
     - name: Import sorting with isort
       run: |
-        cd ${{ env.RESC_VCS_SCANNER_DIR }}
         tox -e sort
     
     - name: Lint with flake8
       run: |
-        cd ${{ env.RESC_VCS_SCANNER_DIR }}
         tox -e lint
 
     # This step will only execute if PR is created internally.
@@ -72,7 +68,7 @@ jobs:
       if: ${{ (github.event.pull_request.head.repo.full_name == 'abnamro/repository-scanner') || (github.ref == 'refs/heads/main') }}
       uses: SonarSource/sonarcloud-github-action@master
       with:
-        projectBaseDir: ${{ env.RESC_VCS_SCANNER_DIR }}
+        projectBaseDir: /
         args: >
           -Dsonar.organization=abnamro-resc
           -Dsonar.projectKey=abnamro-resc_resc-vcs-scanner
@@ -128,7 +124,6 @@ jobs:
 
       - name: Building python package
         run: |
-          cd ${{ env.RESC_VCS_SCANNER_DIR }}
           python -m pip install --upgrade pip build
           python -m build
           
@@ -137,13 +132,12 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.__PYPI_TOKEN__ }}
-          packages_dir: ${{ env.RESC_VCS_SCANNER_DIR }}/dist
+          packages_dir: ./dist
           skip_existing: true
 
       - id: getversion
         name: Get package version
         run: | 
-          cd ${{ env.RESC_VCS_SCANNER_DIR }}
           scanner_version=$(python ./setup.py --version)
           echo "scanner_version=$scanner_version" >> $GITHUB_OUTPUT
 
@@ -159,13 +153,12 @@ jobs:
       - name: Docker Lint
         uses: hadolint/hadolint-action@v2.0.0
         with:
-          dockerfile: ${{ env.RESC_VCS_SCANNER_DIR }}/Dockerfile
+          dockerfile: ./Dockerfile
           failure-threshold: error
 
       - name: Build an image from Dockerfile
         run: |
-          cd ${{ env.RESC_COMPONENTS }}
-          docker build -t ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{needs.python-build-and-publish.outputs.scanner_version}} -f ./resc-vcs-scanner/Dockerfile .
+          docker build -t ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{needs.python-build-and-publish.outputs.scanner_version}} -f ./Dockerfile .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
@@ -207,7 +200,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
-          file: ${{ env.RESC_VCS_SCANNER_DIR }}/Dockerfile
-          context: ${{ env.RESC_COMPONENTS }}/
+          file: ./Dockerfile
+          context: ./
           push: ${{ env.PUBLISH_IMAGE }}
           tags: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest, ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{needs.python-build-and-publish.outputs.scanner_version}}
