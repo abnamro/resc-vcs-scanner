@@ -1,0 +1,1 @@
+- [Security Policy](https://github.com/abnamro/repository-scanner/blob/main/SECURITY.md)
