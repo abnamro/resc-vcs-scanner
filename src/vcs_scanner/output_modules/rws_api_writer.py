@@ -24,7 +24,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file
 from vcs_scanner.model import VCSInstanceRuntime
-from vcs_scanner.output_module import OutputModule
+from vcs_scanner.output_modules.output_module import OutputModule
 
 logger = logging.getLogger(__name__)
 

@@ -16,9 +16,9 @@ from termcolor import colored
 
 # First Party
 from vcs_scanner.helpers.finding_action import FindingAction
+from vcs_scanner.helpers.ignore_list_provider import IgnoredListProvider
 from vcs_scanner.model import VCSInstanceRuntime
-from vcs_scanner.output_module import OutputModule
-from vcs_scanner.secret_scanners.ignore_list_provider import IgnoredListProvider
+from vcs_scanner.output_modules.output_module import OutputModule
 
 logger = logging.getLogger(__name__)
 

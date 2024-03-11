@@ -13,7 +13,7 @@ from resc_backend.resc_web_service.schema.scan import ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
-from vcs_scanner.secret_scanners.rws_api_writer import RESTAPIWriter
+from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 
 
 # A test method to check the happy flow of the write_repository method.
@@ -258,8 +258,8 @@ def test_download_rule_pack_unsuccessful(error, get):
                                  f"error: {get.return_value.status_code}->{get.return_value.text}")
 
 
-@patch("vcs_scanner.secret_scanners.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version")
-@patch("vcs_scanner.secret_scanners.rws_api_writer.RESTAPIWriter.download_rule_pack")
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version")
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.download_rule_pack")
 def test_check_active_rule_pack_version_when_version_provided_equals_to_active_rule_pack_version(
         download_rule_pack,
         get_active_rule_pack_version):
@@ -272,8 +272,8 @@ def test_check_active_rule_pack_version_when_version_provided_equals_to_active_r
     assert rule_pack_version is get_active_rule_pack_version.return_value
 
 
-@patch("vcs_scanner.secret_scanners.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version")
-@patch("vcs_scanner.secret_scanners.rws_api_writer.RESTAPIWriter.download_rule_pack")
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version")
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.download_rule_pack")
 def test_check_active_rule_pack_version_when_version_provided_not_equals_to_active_rule_pack_version(
         download_rule_pack,
         get_active_rule_pack_version):
@@ -286,7 +286,7 @@ def test_check_active_rule_pack_version_when_version_provided_not_equals_to_acti
     assert rule_pack_version is download_rule_pack.return_value
 
 
-@patch("vcs_scanner.secret_scanners.rws_api_writer.RESTAPIWriter.download_rule_pack")
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.download_rule_pack")
 def test_check_active_rule_pack_version_when_rule_pack_version_not_provided(download_rule_pack):
     url = "https://nonexistingwebsite.com"
     rule_pack_version = None

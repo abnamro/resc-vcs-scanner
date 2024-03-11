@@ -10,7 +10,7 @@ from resc_backend.resc_web_service.schema.repository import RepositoryCreate, Re
 from resc_backend.resc_web_service.schema.scan import ScanRead
 
 # First Party
-from vcs_scanner.secret_scanners.stdout_writer import STDOUTWriter
+from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 
 THIS_DIR = Path(__file__).parent.parent
 
@@ -31,7 +31,7 @@ def test_write_correct_repository(info_log):
     info_log.assert_called_once_with(expected_call)
 
 
-@patch("vcs_scanner.secret_scanners.stdout_writer.STDOUTWriter._get_rule_tags")
+@patch("vcs_scanner.output_modules.stdout_writer.STDOUTWriter._get_rule_tags")
 @patch("sys.exit")
 @patch("logging.Logger.info")
 def test_write_findings(info_log, exit_mock, _get_rule_tags):

@@ -15,7 +15,7 @@ from resc_backend.resc_web_service.schema.scan import Scan
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
-from vcs_scanner.output_module import OutputModule
+from vcs_scanner.output_modules.output_module import OutputModule
 from vcs_scanner.resc_worker import RESCWorker
 from vcs_scanner.secret_scanners.git_operation import clone_repository
 from vcs_scanner.secret_scanners.gitleaks_wrapper import GitLeaksWrapper

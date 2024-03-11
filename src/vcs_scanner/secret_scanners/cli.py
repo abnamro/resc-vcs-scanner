@@ -15,9 +15,9 @@ from vcs_scanner.common import get_rule_pack_version_from_file, initialise_logs
 from vcs_scanner.constants import CLI_VCS_AZURE, CLI_VCS_BITBUCKET, CLI_VCS_LOCAL_SCAN, LOG_FILE_PATH_CLI
 from vcs_scanner.helpers.env_default import EnvDefault
 from vcs_scanner.model import RepositoryRuntime
-from vcs_scanner.secret_scanners.rws_api_writer import RESTAPIWriter
+from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
+from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
-from vcs_scanner.secret_scanners.stdout_writer import STDOUTWriter
 
 logger_config = initialise_logs(LOG_FILE_PATH_CLI)
 logger = logging.getLogger(__name__)
