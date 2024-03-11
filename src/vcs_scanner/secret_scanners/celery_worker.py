@@ -25,6 +25,8 @@ from vcs_scanner.secret_scanners.configuration import (
     REQUIRED_ENV_VARS,
     RESC_API_NO_AUTH_SERVICE_HOST,
     RESC_API_NO_AUTH_SERVICE_PORT,
+    RESC_IGNORE_TAGS,
+    RESC_INCLUDE_TAGS,
     VCS_INSTANCES_FILE_PATH
 )
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
@@ -81,7 +83,10 @@ def scan_repository(repository):
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
             gitleaks_rules_path=TEMP_RULE_FILE,
             rule_pack_version=active_rule_pack_version,
-            output_plugin=RESTAPIWriter(rws_url=rws_url),
+            output_plugin=RESTAPIWriter(rws_url=rws_url,
+                                        toml_rule_file_path=TEMP_RULE_FILE,
+                                        include_tags=env_variables[RESC_INCLUDE_TAGS],
+                                        ignore_tags=env_variables[RESC_IGNORE_TAGS]),
             repository=repository,
             username=vcs_instance.username,
             personal_access_token=vcs_instance.token,

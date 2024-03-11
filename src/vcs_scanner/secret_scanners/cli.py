@@ -65,6 +65,11 @@ def create_cli_argparser() -> ArgumentParser:
                                help="Filter for outputting findings based on specified tags. "
                                     "Provided as comma seperated list. "
                                     "Can also be set via the RESC_INCLUDE_TAGS environment variable")
+    parser_common.add_argument("--ignore-tags", required=False, action=EnvDefault, type=str,
+                               envvar="RESC_IGNORE_TAGS",
+                               help="Filter for NOT outputting findings based on specified tags. "
+                                    "Provided as comma seperated list. "
+                                    "Can also be set via the RESC_IGNORE_TAGS environment variable")
     parser_common.add_argument("-v", "--verbose", required=False, action="store_true",
                                help="Enable more verbose logging")
 
@@ -157,8 +162,10 @@ def validate_cli_arguments(args: Namespace):  # pylint: disable=R0912
         args.repo_name = os.path.split(args.dir.absolute())[1]
 
     # Split the include_tags by comma if supplied
-    if args.include_tags:
-        args.include_tags = args.include_tags.split(",")
+    args.include_tags = args.include_tags.split(",") if args.include_tags else None
+
+    # Split the ignore_tags by comma if supplied
+    args.ignore_tags = args.ignore_tags.split(",") if args.ignore_tags else None
 
     if not valid_arguments:
         return False
@@ -212,6 +219,7 @@ def scan_directory(args: Namespace):
                                  exit_code_warn=args.exit_code_warn,
                                  exit_code_block=args.exit_code_block,
                                  include_tags=args.include_tags,
+                                 ignore_tags=args.ignore_tags,
                                  working_dir=args.dir,
                                  ignore_findings_path=args.ignored_blocker_path)
     with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
@@ -252,7 +260,10 @@ def scan_repository(args: Namespace):
     )
 
     if args.rws_url:
-        output_plugin = RESTAPIWriter(rws_url=args.rws_url)
+        output_plugin = RESTAPIWriter(rws_url=args.rws_url,
+                                      toml_rule_file_path=args.gitleaks_rules_path,
+                                      include_tags=args.include_tags,
+                                      ignore_tags=args.ignore_tags)
         rule_pack_version = output_plugin.download_rule_pack()
 
     else:
@@ -260,6 +271,7 @@ def scan_repository(args: Namespace):
                                      exit_code_warn=args.exit_code_warn,
                                      exit_code_block=args.exit_code_block,
                                      include_tags=args.include_tags,
+                                     ignore_tags=args.ignore_tags,
                                      working_dir=args.dir,
                                      ignore_findings_path=args.ignored_blocker_path)
         with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:

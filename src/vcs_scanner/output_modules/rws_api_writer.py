@@ -23,6 +23,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file
+from vcs_scanner.helpers.finding_filter import get_rule_tags, should_process_finding
 from vcs_scanner.model import VCSInstanceRuntime
 from vcs_scanner.output_modules.output_module import OutputModule
 
@@ -31,8 +32,15 @@ logger = logging.getLogger(__name__)
 
 class RESTAPIWriter(OutputModule):
 
-    def __init__(self, rws_url):
+    def __init__(self,
+                 rws_url,
+                 toml_rule_file_path: str = None,
+                 ignore_tags: [str] = None,
+                 include_tags: [str] = None):
         self.rws_url = rws_url
+        self.toml_rule_file_path = toml_rule_file_path
+        self.ignore_tags = ignore_tags
+        self.include_tags = include_tags
 
     def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
         created_vcs_instance = None
@@ -60,15 +68,15 @@ class RESTAPIWriter(OutputModule):
             logger.warning(f"Creating repository failed with error: {response.status_code}->{response.text}")
         return created_repository
 
-    def write_findings(
-            self,
-            scan_id: int,
-            repository_id: int,
-            scan_findings: List[FindingBase], ):
+    def write_findings(self, scan_id: int, repository_id: int, scan_findings: List[FindingBase], ):
         findings_create = []
+        rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
         for finding in scan_findings:
             new_finding = FindingCreate.create_from_base_class(base_object=finding, repository_id=repository_id)
-            findings_create.append(new_finding)
+
+            if should_process_finding(finding=finding, rule_tags=rule_tags,
+                                      ignore_tags=self.ignore_tags, include_tags=self.include_tags):
+                findings_create.append(new_finding)
 
         response = create_findings_with_scan_id(self.rws_url,
                                                 findings_create,
