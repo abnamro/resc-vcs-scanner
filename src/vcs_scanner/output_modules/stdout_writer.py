@@ -29,14 +29,14 @@ class STDOUTWriter(OutputModule):
                  toml_rule_file_path: str,
                  exit_code_warn: int,
                  exit_code_block: int,
-                 filter_tag: str = None,
+                 include_tags: [str] = None,
                  working_dir: str = "",
                  ignore_findings_path: str = "",
                  ):
         self.toml_rule_file_path: str = toml_rule_file_path
         self.exit_code_warn: int = exit_code_warn
         self.exit_code_block: int = exit_code_block
-        self.filter_tag: str = filter_tag
+        self.include_tags: [str] = include_tags
         self.exit_code_success = 0
         self.working_dir = working_dir
         self.ignore_findings_providers: IgnoredListProvider = IgnoredListProvider(ignore_findings_path)
@@ -133,7 +133,7 @@ class STDOUTWriter(OutputModule):
 
         return rule_action
 
-    def _finding_tag_filter(self, finding: FindingCreate, rule_tags: dict, filter_tag: str) -> bool:
+    def _finding_tag_filter(self, finding: FindingCreate, rule_tags: dict, include_tags: [str]) -> bool:
         """
             Determine the action to take for the finding, based on the rule tags
         :param finding:
@@ -145,7 +145,7 @@ class STDOUTWriter(OutputModule):
         :return bool:
             The output will be boolean, based on the tag filter given
         """
-        if filter_tag and filter_tag not in rule_tags.get(finding.rule_name, []):
+        if include_tags and set(include_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
             return False
         return True
 
@@ -174,7 +174,7 @@ class STDOUTWriter(OutputModule):
         rule_tags = self._get_rule_tags()
         ignore_dictionary = self.ignore_findings_providers.get_ignore_list()
         for finding in scan_findings:
-            should_process_finding = self._finding_tag_filter(finding, rule_tags, self.filter_tag)
+            should_process_finding = self._finding_tag_filter(finding, rule_tags, self.include_tags)
             if should_process_finding:
                 finding_action = self._determine_finding_action(finding, rule_tags)
                 finding_action = self._determine_if_ignored(finding_action,

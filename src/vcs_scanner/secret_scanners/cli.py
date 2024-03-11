@@ -60,10 +60,11 @@ def create_cli_argparser() -> ArgumentParser:
                                envvar="RESC_EXIT_CODE_BLOCK",
                                help="Exit code given if CLI encounters findings tagged with Block, default 1. "
                                     "Can also be set via the RESC_EXIT_CODE_BLOCK environment variable")
-    parser_common.add_argument("--filter-tag", required=False, action=EnvDefault, type=str,
-                               envvar="RESC_FILTER_TAG",
-                               help="Filter for findings based on specified tag. "
-                                    "Can also be set via the RESC_FILTER_TAG environment variable")
+    parser_common.add_argument("--include-tags", required=False, action=EnvDefault, type=str,
+                               envvar="RESC_INCLUDE_TAGS",
+                               help="Filter for outputting findings based on specified tags. "
+                                    "Provided as comma seperated list. "
+                                    "Can also be set via the RESC_INCLUDE_TAGS environment variable")
     parser_common.add_argument("-v", "--verbose", required=False, action="store_true",
                                help="Enable more verbose logging")
 
@@ -155,6 +156,10 @@ def validate_cli_arguments(args: Namespace):  # pylint: disable=R0912
             valid_arguments = False
         args.repo_name = os.path.split(args.dir.absolute())[1]
 
+    # Split the include_tags by comma if supplied
+    if args.include_tags:
+        args.include_tags = args.include_tags.split(",")
+
     if not valid_arguments:
         return False
 
@@ -206,7 +211,7 @@ def scan_directory(args: Namespace):
     output_plugin = STDOUTWriter(toml_rule_file_path=args.gitleaks_rules_path,
                                  exit_code_warn=args.exit_code_warn,
                                  exit_code_block=args.exit_code_block,
-                                 filter_tag=args.filter_tag,
+                                 include_tags=args.include_tags,
                                  working_dir=args.dir,
                                  ignore_findings_path=args.ignored_blocker_path)
     with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
@@ -254,7 +259,7 @@ def scan_repository(args: Namespace):
         output_plugin = STDOUTWriter(toml_rule_file_path=args.gitleaks_rules_path,
                                      exit_code_warn=args.exit_code_warn,
                                      exit_code_block=args.exit_code_block,
-                                     filter_tag=args.filter_tag,
+                                     include_tags=args.include_tags,
                                      working_dir=args.dir,
                                      ignore_findings_path=args.ignored_blocker_path)
         with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:

@@ -255,7 +255,7 @@ def test_finding_tag_filter_no_filter():
                             repository_id=1)
 
     result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1) \
-        ._finding_tag_filter(finding=finding, rule_tags={"rule_1": ["tag"]}, filter_tag=None)
+        ._finding_tag_filter(finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=None)
     assert result is True
 
 
@@ -276,7 +276,7 @@ def test_finding_tag_filter_match_filter():
                             repository_id=1)
 
     result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1) \
-        ._finding_tag_filter(finding=finding, rule_tags={"rule_1": ["tag"]}, filter_tag="tag")
+        ._finding_tag_filter(finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=["tag"])
     assert result is True
 
 
@@ -297,5 +297,5 @@ def test_finding_tag_filter_nomatch_filter():
                             repository_id=1)
 
     result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1) \
-        ._finding_tag_filter(finding=finding, rule_tags={"rule_1": ["tag"]}, filter_tag="resc")
+        ._finding_tag_filter(finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=["resc"])
     assert result is False
