@@ -18,17 +18,15 @@ def should_process_finding(finding: FindingCreate, rule_tags: dict = None,
     :return bool:
         The output will be boolean, based on the tag filter given
     """
-    should_process = True
-
     # Rule tag is not in the include tags list, return false
     if include_tags and rule_tags and set(include_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
-        should_process = False
+        return False
 
     # Rule tag is in the ignore tags list, return false
     if ignore_tags and rule_tags and not set(ignore_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
-        should_process = False
+        return False
 
-    return should_process
+    return True
 
 
 def get_rule_tags(toml_rule_file_path: str) -> dict:

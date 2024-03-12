@@ -78,6 +78,11 @@ def scan_repository(repository):
                                 repository_url=repository_runtime.repository_url,
                                 vcs_instance=vcs_instance.id_
                                 )
+        # Split the include_tags by comma if supplied
+        include_tags = env_variables[RESC_INCLUDE_TAGS].split(",") if env_variables[RESC_INCLUDE_TAGS] else None
+
+        # Split the ignore_tags by comma if supplied
+        ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
 
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
@@ -85,8 +90,8 @@ def scan_repository(repository):
             rule_pack_version=active_rule_pack_version,
             output_plugin=RESTAPIWriter(rws_url=rws_url,
                                         toml_rule_file_path=TEMP_RULE_FILE,
-                                        include_tags=env_variables[RESC_INCLUDE_TAGS],
-                                        ignore_tags=env_variables[RESC_IGNORE_TAGS]),
+                                        include_tags=include_tags,
+                                        ignore_tags=ignore_tags),
             repository=repository,
             username=vcs_instance.username,
             personal_access_token=vcs_instance.token,

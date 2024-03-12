@@ -63,12 +63,12 @@ def create_cli_argparser() -> ArgumentParser:
     parser_common.add_argument("--include-tags", required=False, action=EnvDefault, type=str,
                                envvar="RESC_INCLUDE_TAGS",
                                help="Filter for outputting findings based on specified tags. "
-                                    "Provided as comma seperated list. "
+                                    "Provided as comma separated list. "
                                     "Can also be set via the RESC_INCLUDE_TAGS environment variable")
     parser_common.add_argument("--ignore-tags", required=False, action=EnvDefault, type=str,
                                envvar="RESC_IGNORE_TAGS",
                                help="Filter for NOT outputting findings based on specified tags. "
-                                    "Provided as comma seperated list. "
+                                    "Provided as comma separated list. "
                                     "Can also be set via the RESC_IGNORE_TAGS environment variable")
     parser_common.add_argument("-v", "--verbose", required=False, action="store_true",
                                help="Enable more verbose logging")
