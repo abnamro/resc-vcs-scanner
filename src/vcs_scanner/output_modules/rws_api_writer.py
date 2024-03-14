@@ -35,8 +35,8 @@ class RESTAPIWriter(OutputModule):
     def __init__(self,
                  rws_url,
                  toml_rule_file_path: str = None,
-                 ignore_tags: [str] = None,
-                 include_tags: [str] = None):
+                 ignore_tags: List[str] = None,
+                 include_tags: List[str] = None):
         self.rws_url = rws_url
         self.toml_rule_file_path = toml_rule_file_path
         self.ignore_tags = ignore_tags

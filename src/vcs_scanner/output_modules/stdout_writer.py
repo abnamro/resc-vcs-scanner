@@ -29,8 +29,8 @@ class STDOUTWriter(OutputModule):
                  exit_code_warn: int,
                  exit_code_block: int,
                  toml_rule_file_path: str = None,
-                 include_tags: [str] = None,
-                 ignore_tags: [str] = None,
+                 include_tags: List[str] = None,
+                 ignore_tags: List[str] = None,
                  working_dir: str = "",
                  ignore_findings_path: str = "",
                  ):
