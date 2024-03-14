@@ -10,7 +10,7 @@ from resc_backend.resc_web_service.schema.scan import ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
-from vcs_scanner.secret_scanners.rws_api_writer import RESTAPIWriter
+from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 
 sys.path.insert(0, "src")
 

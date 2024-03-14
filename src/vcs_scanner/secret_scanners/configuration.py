@@ -17,6 +17,8 @@ VCS_INSTANCES_FILE_PATH = "VCS_INSTANCES_FILE_PATH"
 RESC_API_NO_AUTH_SERVICE_HOST = "RESC_API_NO_AUTH_SERVICE_HOST"
 RESC_API_NO_AUTH_SERVICE_PORT = "RESC_API_NO_AUTH_SERVICE_PORT"
 
+RESC_INCLUDE_TAGS = "RESC_INCLUDE_TAGS"
+RESC_IGNORE_TAGS = "RESC_IGNORE_TAGS"
 
 REQUIRED_ENV_VARS = [
     EnvironmentVariable(
@@ -70,4 +72,16 @@ REQUIRED_ENV_VARS = [
         "The absolute path to the json file containing the vcs_instances_definitions",
         required=True,
     ),
+    EnvironmentVariable(
+        RESC_INCLUDE_TAGS,
+        "Filter for outputting findings based on specified tags. Provided as comma seperated list.",
+        required=False,
+        default=None,
+    ),
+    EnvironmentVariable(
+        RESC_IGNORE_TAGS,
+        "Filter for NOT outputting findings based on specified tags. Provided as comma seperated list.",
+        required=False,
+        default=None,
+    )
 ]

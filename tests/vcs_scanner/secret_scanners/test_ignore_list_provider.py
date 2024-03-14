@@ -2,7 +2,7 @@
 from pathlib import Path
 
 # First Party
-from vcs_scanner.secret_scanners.ignore_list_provider import IgnoredListProvider
+from vcs_scanner.helpers.ignore_list_provider import IgnoredListProvider
 
 THIS_DIR = Path(__file__).parent.parent
 

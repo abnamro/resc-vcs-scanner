@@ -5,7 +5,6 @@ from datetime import datetime
 from typing import List, Optional
 
 # Third Party
-import tomlkit
 from prettytable import PrettyTable
 from resc_backend.resc_web_service.schema.finding import FindingCreate
 from resc_backend.resc_web_service.schema.repository import Repository
@@ -16,9 +15,10 @@ from termcolor import colored
 
 # First Party
 from vcs_scanner.helpers.finding_action import FindingAction
+from vcs_scanner.helpers.finding_filter import get_rule_tags, should_process_finding
+from vcs_scanner.helpers.ignore_list_provider import IgnoredListProvider
 from vcs_scanner.model import VCSInstanceRuntime
-from vcs_scanner.output_module import OutputModule
-from vcs_scanner.secret_scanners.ignore_list_provider import IgnoredListProvider
+from vcs_scanner.output_modules.output_module import OutputModule
 
 logger = logging.getLogger(__name__)
 
@@ -26,17 +26,19 @@ logger = logging.getLogger(__name__)
 class STDOUTWriter(OutputModule):
 
     def __init__(self,
-                 toml_rule_file_path: str,
                  exit_code_warn: int,
                  exit_code_block: int,
-                 filter_tag: str = None,
+                 toml_rule_file_path: str = None,
+                 include_tags: [str] = None,
+                 ignore_tags: [str] = None,
                  working_dir: str = "",
                  ignore_findings_path: str = "",
                  ):
         self.toml_rule_file_path: str = toml_rule_file_path
         self.exit_code_warn: int = exit_code_warn
         self.exit_code_block: int = exit_code_block
-        self.filter_tag: str = filter_tag
+        self.include_tags: [str] = include_tags
+        self.ignore_tags: [str] = ignore_tags
         self.exit_code_success = 0
         self.working_dir = working_dir
         self.ignore_findings_providers: IgnoredListProvider = IgnoredListProvider(ignore_findings_path)
@@ -59,25 +61,8 @@ class STDOUTWriter(OutputModule):
         logger.info(f"Scanning repository {repository.project_key}/{repository.repository_name}")
         return repository
 
-    def _get_rule_tags(self) -> dict:
-        """
-            Get the tags per rule from the .toml rule file, from self.toml_rule_file_path
-        :return: dict.
-            The output will contain a dictionary with the rule id as the key and the tags as a list in the value
-        """
-        rule_tags = {}
-        # read toml
-        with open(self.toml_rule_file_path, encoding="utf-8") as toml_rule_file:
-            toml_rule_dictionary = tomlkit.loads(toml_rule_file.read())
-            # convert to dict
-            for toml_rule in toml_rule_dictionary["rules"]:
-                rule_id = toml_rule.get('id', None)
-                if rule_id:
-                    rule_tags[rule_id] = toml_rule.get('tags', [])
-        return rule_tags
-
     @staticmethod
-    def _determine_finding_action(finding: FindingCreate, rule_tags: dict) -> FindingAction:
+    def _determine_finding_action(finding: FindingCreate, rule_tags: dict = None) -> FindingAction:
         """
             Determine the action to take for the finding, based on the rule tags
         :param finding:
@@ -88,9 +73,9 @@ class STDOUTWriter(OutputModule):
             FindingAction to take for this finding
         """
         rule_action = FindingAction.INFO
-        if FindingAction.WARN in rule_tags.get(finding.rule_name, []):
+        if rule_tags and FindingAction.WARN in rule_tags.get(finding.rule_name, []):
             rule_action = FindingAction.WARN
-        if FindingAction.BLOCK in rule_tags.get(finding.rule_name, []):
+        if rule_tags and FindingAction.BLOCK in rule_tags.get(finding.rule_name, []):
             rule_action = FindingAction.BLOCK
 
         return rule_action
@@ -133,22 +118,6 @@ class STDOUTWriter(OutputModule):
 
         return rule_action
 
-    def _finding_tag_filter(self, finding: FindingCreate, rule_tags: dict, filter_tag: str) -> bool:
-        """
-            Determine the action to take for the finding, based on the rule tags
-        :param finding:
-            FindingCreate instance of the finding
-        :param rule_tags:
-            Dictionary containing all the rules and there respective tags
-        :Param: filter_tag.
-            filter_tag will check for the tag
-        :return bool:
-            The output will be boolean, based on the tag filter given
-        """
-        if filter_tag and filter_tag not in rule_tags.get(finding.rule_name, []):
-            return False
-        return True
-
     def write_findings(self, scan_id: int, repository_id: int, scan_findings: List[FindingCreate]):
         """
             Write the findings to the STDOUT in a nice table and set the exit code based on the FindingActions found
@@ -170,12 +139,12 @@ class STDOUTWriter(OutputModule):
         info_count = 0
 
         exit_code = self.exit_code_success
-
-        rule_tags = self._get_rule_tags()
+        rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
         ignore_dictionary = self.ignore_findings_providers.get_ignore_list()
         for finding in scan_findings:
-            should_process_finding = self._finding_tag_filter(finding, rule_tags, self.filter_tag)
-            if should_process_finding:
+            should_process = should_process_finding(finding=finding, rule_tags=rule_tags,
+                                                    include_tags=self.include_tags, ignore_tags=self.ignore_tags)
+            if should_process:
                 finding_action = self._determine_finding_action(finding, rule_tags)
                 finding_action = self._determine_if_ignored(finding_action,
                                                             finding,

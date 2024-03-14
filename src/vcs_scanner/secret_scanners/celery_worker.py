@@ -14,6 +14,7 @@ from vcs_scanner.common import initialise_logs, load_vcs_instances
 from vcs_scanner.constants import LOG_FILE_PATH
 from vcs_scanner.helpers.environment_wrapper import validate_environment
 from vcs_scanner.model import RepositoryRuntime
+from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.secret_scanners.configuration import (
     GITLEAKS_PATH,
     RABBITMQ_DEFAULT_VHOST,
@@ -24,9 +25,10 @@ from vcs_scanner.secret_scanners.configuration import (
     REQUIRED_ENV_VARS,
     RESC_API_NO_AUTH_SERVICE_HOST,
     RESC_API_NO_AUTH_SERVICE_PORT,
+    RESC_IGNORE_TAGS,
+    RESC_INCLUDE_TAGS,
     VCS_INSTANCES_FILE_PATH
 )
-from vcs_scanner.secret_scanners.rws_api_writer import RESTAPIWriter
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
 
 env_variables = validate_environment(REQUIRED_ENV_VARS)
@@ -76,12 +78,20 @@ def scan_repository(repository):
                                 repository_url=repository_runtime.repository_url,
                                 vcs_instance=vcs_instance.id_
                                 )
+        # Split the include_tags by comma if supplied
+        include_tags = env_variables[RESC_INCLUDE_TAGS].split(",") if env_variables[RESC_INCLUDE_TAGS] else None
+
+        # Split the ignore_tags by comma if supplied
+        ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
 
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
             gitleaks_rules_path=TEMP_RULE_FILE,
             rule_pack_version=active_rule_pack_version,
-            output_plugin=RESTAPIWriter(rws_url=rws_url),
+            output_plugin=RESTAPIWriter(rws_url=rws_url,
+                                        toml_rule_file_path=TEMP_RULE_FILE,
+                                        include_tags=include_tags,
+                                        ignore_tags=ignore_tags),
             repository=repository,
             username=vcs_instance.username,
             personal_access_token=vcs_instance.token,
