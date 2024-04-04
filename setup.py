@@ -1,5 +1,10 @@
 # Third Party
 from setuptools import setup
 
+def get_required_packages():
+    with open('requirements.txt') as f:
+        return f.read().splitlines()
 
-setup()
+setup(
+ install_requires=get_required_packages()
+)
