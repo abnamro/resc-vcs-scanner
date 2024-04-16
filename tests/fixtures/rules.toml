@@ -19,3 +19,4 @@ version = "2.0.13"
 	description = "Another Fake rule again"
 	regex = '''something'''
 	tags = ["Warn"]
+	comment = "See rule 3."

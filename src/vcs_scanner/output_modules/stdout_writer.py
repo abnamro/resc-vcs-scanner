@@ -15,7 +15,7 @@ from termcolor import colored
 
 # First Party
 from vcs_scanner.helpers.finding_action import FindingAction
-from vcs_scanner.helpers.finding_filter import get_rule_tags, should_process_finding
+from vcs_scanner.helpers.finding_filter import get_rule_comment, get_rule_tags, should_process_finding
 from vcs_scanner.helpers.ignore_list_provider import IgnoredListProvider
 from vcs_scanner.model import VCSInstanceRuntime
 from vcs_scanner.output_modules.output_module import OutputModule
@@ -130,7 +130,7 @@ class STDOUTWriter(OutputModule):
         """
         # Initialize table
         output_table = PrettyTable()
-        output_table.field_names = ['Level', 'Rule', 'Line', 'Position', 'File path']
+        output_table.field_names = ['Level', 'Rule', 'Line', 'Position', 'File path', 'Comment']
         output_table.align = 'l'
         output_table.align['Line'] = 'r'
 
@@ -140,6 +140,7 @@ class STDOUTWriter(OutputModule):
 
         exit_code = self.exit_code_success
         rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
+        rule_comments = get_rule_comment(self.toml_rule_file_path) if self.toml_rule_file_path else None
         ignore_dictionary = self.ignore_findings_providers.get_ignore_list()
         for finding in scan_findings:
             should_process = should_process_finding(finding=finding, rule_tags=rule_tags,
@@ -171,8 +172,10 @@ class STDOUTWriter(OutputModule):
                     elif finding_action == FindingAction.BLOCK:
                         exit_code = self.exit_code_block
 
+                comment = rule_comments.get(finding.rule_name, "") if rule_comments else ""
+
                 output_table.add_row([finding_action_value, finding.rule_name, finding.line_number,
-                                     f"{finding.column_start}-{finding.column_end}", finding.file_path])
+                                     f"{finding.column_start}-{finding.column_end}", finding.file_path, comment])
 
         logger.info(f"\n{output_table.get_string(sortby='Level')}")
 
