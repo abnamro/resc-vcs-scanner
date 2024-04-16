@@ -54,15 +54,15 @@ def test_write_findings(info_log, exit_mock):
                      exit_code_block=1) \
         .write_findings(1, 1, findings)
     calls = [call('\n'
-                  '+-------+--------+------+----------+-------------+\n'
-                  '| Level | Rule   | Line | Position | File path   |\n'
-                  '+-------+--------+------+----------+-------------+\n'
-                  '| Info  | rule_1 |    1 | 1-1      | file_path_1 |\n'
-                  '| Info  | rule_2 |    2 | 2-2      | file_path_2 |\n'
-                  '| Info  | rule_3 |    3 | 3-3      | file_path_3 |\n'
-                  '| Info  | rule_4 |    4 | 4-4      | file_path_4 |\n'
-                  '| Info  | rule_5 |    5 | 5-5      | file_path_5 |\n'
-                  '+-------+--------+------+----------+-------------+'),
+                  '+-------+--------+------+----------+-------------+---------+\n'
+                  '| Level | Rule   | Line | Position | File path   | Comment |\n'
+                  '+-------+--------+------+----------+-------------+---------+\n'
+                  '| Info  | rule_1 |    1 | 1-1      | file_path_1 |         |\n'
+                  '| Info  | rule_2 |    2 | 2-2      | file_path_2 |         |\n'
+                  '| Info  | rule_3 |    3 | 3-3      | file_path_3 |         |\n'
+                  '| Info  | rule_4 |    4 | 4-4      | file_path_4 |         |\n'
+                  '| Info  | rule_5 |    5 | 5-5      | file_path_5 |         |\n'
+                  '+-------+--------+------+----------+-------------+---------+'),
              call("Findings detected : Total - 5, Block - 0, Warn - 0, Info - 5"),
              call("Findings threshold check results: PASS")]
     info_log.assert_has_calls(calls, any_order=True)
@@ -94,15 +94,15 @@ def test_write_findings_with_rules(info_log, exit_mock):
                      exit_code_block=1) \
         .write_findings(1, 1, findings)
     calls = [call('\n'
-                  '+-------+--------+------+----------+-------------+\n'
-                  '| Level | Rule   | Line | Position | File path   |\n'
-                  '+-------+--------+------+----------+-------------+\n'
-                  '| Block | rule_1 |    1 | 1-1      | file_path_1 |\n'
-                  '| Block | rule_2 |    2 | 2-2      | file_path_2 |\n'
-                  '| Info  | rule_4 |    4 | 4-4      | file_path_4 |\n'
-                  '| Info  | rule_5 |    5 | 5-5      | file_path_5 |\n'
-                  '| Warn  | rule_3 |    3 | 3-3      | file_path_3 |\n'
-                  '+-------+--------+------+----------+-------------+'),
+                  '+-------+--------+------+----------+-------------+-------------+\n'
+                  '| Level | Rule   | Line | Position | File path   | Comment     |\n'
+                  '+-------+--------+------+----------+-------------+-------------+\n'
+                  '| Block | rule_1 |    1 | 1-1      | file_path_1 |             |\n'
+                  '| Block | rule_2 |    2 | 2-2      | file_path_2 |             |\n'
+                  '| Info  | rule_4 |    4 | 4-4      | file_path_4 |             |\n'
+                  '| Info  | rule_5 |    5 | 5-5      | file_path_5 |             |\n'
+                  '| Warn  | rule_3 |    3 | 3-3      | file_path_3 | See rule 3. |\n'
+                  '+-------+--------+------+----------+-------------+-------------+'),
              call("Findings detected : Total - 5, Block - 2, Warn - 1, Info - 2"),
              call("Scan failed due to policy violations: [Block:2]"),
              call("Findings threshold check results: FAIL")]
@@ -137,15 +137,15 @@ def test_write_findings_with_rules_and_ignore(info_log, exit_mock):
                      ignore_findings_path=ignore_list_path) \
         .write_findings(1, 1, findings)
     calls = [call('\n'
-                  '+---------+--------+------+----------+-------------+\n'
-                  '| Level   | Rule   | Line | Position | File path   |\n'
-                  '+---------+--------+------+----------+-------------+\n'
-                  '| Block   | rule_2 |    2 | 2-2      | file_path_2 |\n'
-                  '| Ignored | rule_1 |    1 | 1-1      | file_path_1 |\n'
-                  '| Info    | rule_4 |    4 | 4-4      | file_path_4 |\n'
-                  '| Info    | rule_5 |    5 | 5-5      | file_path_5 |\n'
-                  '| Warn    | rule_3 |    3 | 3-3      | file_path_3 |\n'
-                  '+---------+--------+------+----------+-------------+'),
+                  '+---------+--------+------+----------+-------------+-------------+\n'
+                  '| Level   | Rule   | Line | Position | File path   | Comment     |\n'
+                  '+---------+--------+------+----------+-------------+-------------+\n'
+                  '| Block   | rule_2 |    2 | 2-2      | file_path_2 |             |\n'
+                  '| Ignored | rule_1 |    1 | 1-1      | file_path_1 |             |\n'
+                  '| Info    | rule_4 |    4 | 4-4      | file_path_4 |             |\n'
+                  '| Info    | rule_5 |    5 | 5-5      | file_path_5 |             |\n'
+                  '| Warn    | rule_3 |    3 | 3-3      | file_path_3 | See rule 3. |\n'
+                  '+---------+--------+------+----------+-------------+-------------+'),
              call("Findings detected : Total - 5, Block - 1, Warn - 2, Info - 2"),
              call("Scan failed due to policy violations: [Block:1]"),
              call("Findings threshold check results: FAIL")]
@@ -181,15 +181,15 @@ def test_write_findings_with_rules_and_ignore_with_directory(info_log, exit_mock
                      ignore_findings_path=ignore_list_path) \
         .write_findings(1, 1, findings)
     calls = [call('\n'
-                  '+---------+--------+------+----------+----------------------------+\n'
-                  '| Level   | Rule   | Line | Position | File path                  |\n'
-                  '+---------+--------+------+----------+----------------------------+\n'
-                  '| Block   | rule_2 |    2 | 2-2      | directory_path/file_path_2 |\n'
-                  '| Ignored | rule_1 |    1 | 1-1      | directory_path/file_path_1 |\n'
-                  '| Info    | rule_4 |    4 | 4-4      | directory_path/file_path_4 |\n'
-                  '| Info    | rule_5 |    5 | 5-5      | directory_path/file_path_5 |\n'
-                  '| Warn    | rule_3 |    3 | 3-3      | directory_path/file_path_3 |\n'
-                  '+---------+--------+------+----------+----------------------------+'),
+                  '+---------+--------+------+----------+----------------------------+-------------+\n'
+                  '| Level   | Rule   | Line | Position | File path                  | Comment     |\n'
+                  '+---------+--------+------+----------+----------------------------+-------------+\n'
+                  '| Block   | rule_2 |    2 | 2-2      | directory_path/file_path_2 |             |\n'
+                  '| Ignored | rule_1 |    1 | 1-1      | directory_path/file_path_1 |             |\n'
+                  '| Info    | rule_4 |    4 | 4-4      | directory_path/file_path_4 |             |\n'
+                  '| Info    | rule_5 |    5 | 5-5      | directory_path/file_path_5 |             |\n'
+                  '| Warn    | rule_3 |    3 | 3-3      | directory_path/file_path_3 | See rule 3. |\n'
+                  '+---------+--------+------+----------+----------------------------+-------------+'),
              call("Findings detected : Total - 5, Block - 1, Warn - 2, Info - 2"),
              call("Scan failed due to policy violations: [Block:1]"),
              call("Findings threshold check results: FAIL")]
