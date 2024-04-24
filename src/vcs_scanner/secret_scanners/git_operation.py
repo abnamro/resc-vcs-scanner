@@ -11,10 +11,12 @@ from git import Repo  # noqa: E402
 logger = logging.getLogger(__name__)
 
 
-def clone_repository(repository_url: str,
-                     repo_clone_path: str,
-                     username: str = "",
-                     personal_access_token: str = "") -> None:
+def clone_repository(
+    repository_url: str,
+    repo_clone_path: str,
+    username: str = "",
+    personal_access_token: str = "",
+) -> None:
     """
         Clones the given repository
     :param repository_url:

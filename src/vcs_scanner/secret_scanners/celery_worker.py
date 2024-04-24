@@ -27,20 +27,25 @@ from vcs_scanner.secret_scanners.configuration import (
     RESC_API_NO_AUTH_SERVICE_PORT,
     RESC_IGNORE_TAGS,
     RESC_INCLUDE_TAGS,
-    VCS_INSTANCES_FILE_PATH
+    VCS_INSTANCES_FILE_PATH,
 )
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
 
 env_variables = validate_environment(REQUIRED_ENV_VARS)
-app = Celery('secret_scanner_worker',
-             broker="amqp://" +
-                    f"{env_variables[RABBITMQ_USERNAME]}" + ":" +
-                    f"{env_variables[RABBITMQ_PASSWORD]}" + "@" +
-                    f"{env_variables[RABBITMQ_SERVICE_HOST]}" + "/" +
-                    f"{env_variables[RABBITMQ_DEFAULT_VHOST]}")
-app.conf.update({'worker_hijack_root_logger': False})
-app.conf.update({'broker_connection_retry': True})
-app.conf.update({'broker_connection_max_retries': 100})
+app = Celery(
+    "secret_scanner_worker",
+    broker="amqp://"
+    + f"{env_variables[RABBITMQ_USERNAME]}"
+    + ":"
+    + f"{env_variables[RABBITMQ_PASSWORD]}"
+    + "@"
+    + f"{env_variables[RABBITMQ_SERVICE_HOST]}"
+    + "/"
+    + f"{env_variables[RABBITMQ_DEFAULT_VHOST]}",
+)
+app.conf.update({"worker_hijack_root_logger": False})
+app.conf.update({"broker_connection_retry": True})
+app.conf.update({"broker_connection_max_retries": 100})
 
 logger = get_task_logger(__name__)
 logger_config = initialise_logs(LOG_FILE_PATH)
@@ -63,43 +68,60 @@ def scan_repository(repository):
     if not DOWNLOADED_RULE_PACK_VERSION:
         DOWNLOADED_RULE_PACK_VERSION = rws_writer.download_rule_pack()
 
-    active_rule_pack_version = rws_writer.check_active_rule_pack_version(rule_pack_version=DOWNLOADED_RULE_PACK_VERSION)
+    active_rule_pack_version = rws_writer.check_active_rule_pack_version(
+        rule_pack_version=DOWNLOADED_RULE_PACK_VERSION
+    )
 
     repository_runtime = RepositoryRuntime(**json.loads(repository))
 
-    logger.info(f"Received repository to scan via the queue '{rabbitmq_queue}' => "
-                f"{repository_runtime.project_key}/{repository_runtime.repository_name}")
+    logger.info(
+        f"Received repository to scan via the queue '{rabbitmq_queue}' => "
+        f"{repository_runtime.project_key}/{repository_runtime.repository_name}"
+    )
     try:
         vcs_instance = VCS_INSTANCES[repository_runtime.vcs_instance_name]
 
-        repository = Repository(project_key=repository_runtime.project_key,
-                                repository_id=repository_runtime.repository_id,
-                                repository_name=repository_runtime.repository_name,
-                                repository_url=repository_runtime.repository_url,
-                                vcs_instance=vcs_instance.id_
-                                )
+        repository = Repository(
+            project_key=repository_runtime.project_key,
+            repository_id=repository_runtime.repository_id,
+            repository_name=repository_runtime.repository_name,
+            repository_url=repository_runtime.repository_url,
+            vcs_instance=vcs_instance.id_,
+        )
         # Split the include_tags by comma if supplied
-        include_tags = env_variables[RESC_INCLUDE_TAGS].split(",") if env_variables[RESC_INCLUDE_TAGS] else None
+        include_tags = (
+            env_variables[RESC_INCLUDE_TAGS].split(",")
+            if env_variables[RESC_INCLUDE_TAGS]
+            else None
+        )
 
         # Split the ignore_tags by comma if supplied
-        ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
+        ignore_tags = (
+            env_variables[RESC_IGNORE_TAGS].split(",")
+            if env_variables[RESC_IGNORE_TAGS]
+            else None
+        )
 
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
             gitleaks_rules_path=TEMP_RULE_FILE,
             rule_pack_version=active_rule_pack_version,
-            output_plugin=RESTAPIWriter(rws_url=rws_url,
-                                        toml_rule_file_path=TEMP_RULE_FILE,
-                                        include_tags=include_tags,
-                                        ignore_tags=ignore_tags),
+            output_plugin=RESTAPIWriter(
+                rws_url=rws_url,
+                toml_rule_file_path=TEMP_RULE_FILE,
+                include_tags=include_tags,
+                ignore_tags=ignore_tags,
+            ),
             repository=repository,
             username=vcs_instance.username,
             personal_access_token=vcs_instance.token,
-            force_base_scan=os.getenv('FORCE_BASE_SCAN', "false").lower() in "true",
-            latest_commit=repository_runtime.latest_commit
+            force_base_scan=os.getenv("FORCE_BASE_SCAN", "false").lower() in "true",
+            latest_commit=repository_runtime.latest_commit,
         )
 
         secret_scanner.run_repository_scan()
     except KeyError:
-        logger.error(f"No configuration found for vcs instance {repository_runtime.vcs_instance_name}, "
-                     f"unable to scan {repository_runtime.project_key}/{repository_runtime.repository_name}")
+        logger.error(
+            f"No configuration found for vcs instance {repository_runtime.vcs_instance_name}, "
+            f"unable to scan {repository_runtime.project_key}/{repository_runtime.repository_name}"
+        )

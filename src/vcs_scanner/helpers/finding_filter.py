@@ -3,8 +3,12 @@ import tomlkit
 from resc_backend.resc_web_service.schema.finding import FindingCreate
 
 
-def should_process_finding(finding: FindingCreate, rule_tags: dict = None,
-                           include_tags: [str] = None, ignore_tags: [str] = None) -> bool:
+def should_process_finding(
+    finding: FindingCreate,
+    rule_tags: dict = None,
+    include_tags: [str] = None,
+    ignore_tags: [str] = None,
+) -> bool:
     """
         Determine the action to take for the finding, based on the rule tags
     :param finding:
@@ -19,11 +23,19 @@ def should_process_finding(finding: FindingCreate, rule_tags: dict = None,
         The output will be boolean, based on the tag filter given
     """
     # Rule tag is not in the include tags list, return false
-    if include_tags and rule_tags and set(include_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
+    if (
+        include_tags
+        and rule_tags
+        and set(include_tags).isdisjoint(set(rule_tags.get(finding.rule_name, [])))
+    ):
         return False
 
     # Rule tag is in the ignore tags list, return false
-    if ignore_tags and rule_tags and not set(ignore_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
+    if (
+        ignore_tags
+        and rule_tags
+        and not set(ignore_tags).isdisjoint(set(rule_tags.get(finding.rule_name, [])))
+    ):
         return False
 
     return True
@@ -41,9 +53,9 @@ def get_rule_tags(toml_rule_file_path: str) -> dict:
         toml_rule_dictionary = tomlkit.loads(toml_rule_file.read())
         # convert to dict
         for toml_rule in toml_rule_dictionary["rules"]:
-            rule_id = toml_rule.get('id', None)
+            rule_id = toml_rule.get("id", None)
             if rule_id:
-                rule_tags[rule_id] = toml_rule.get('tags', [])
+                rule_tags[rule_id] = toml_rule.get("tags", [])
     return rule_tags
 
 
@@ -59,7 +71,7 @@ def get_rule_comment(toml_rule_file_path: str) -> dict:
         toml_rule_dictionary = tomlkit.loads(toml_rule_file.read())
         # convert to dict
         for toml_rule in toml_rule_dictionary["rules"]:
-            rule_id = toml_rule.get('id', None)
+            rule_id = toml_rule.get("id", None)
             if rule_id:
-                rule_comments[rule_id] = toml_rule.get('comment', '')
+                rule_comments[rule_id] = toml_rule.get("comment", "")
     return rule_comments

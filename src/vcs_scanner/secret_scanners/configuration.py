@@ -83,5 +83,5 @@ REQUIRED_ENV_VARS = [
         "Filter for NOT outputting findings based on specified tags. Provided as comma seperated list.",
         required=False,
         default=None,
-    )
+    ),
 ]
