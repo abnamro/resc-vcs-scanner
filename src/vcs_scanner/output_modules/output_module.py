@@ -15,7 +15,9 @@ from vcs_scanner.model import VCSInstanceRuntime
 
 class OutputModule(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
+    def write_vcs_instance(
+        self, vcs_instance_runtime: VCSInstanceRuntime
+    ) -> Optional[VCSInstanceRead]:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -24,20 +26,22 @@ class OutputModule(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def write_findings(
-            self,
-            scan_id: int,
-            repository_id: int,
-            scan_findings: List[FindingCreate],):
+        self,
+        scan_id: int,
+        repository_id: int,
+        scan_findings: List[FindingCreate],
+    ):
         raise NotImplementedError
 
     @abc.abstractmethod
     def write_scan(
-            self,
-            scan_type_to_run: ScanType,
-            last_scanned_commit: str,
-            scan_timestamp: str,
-            repository: Repository,
-            rule_pack: str) -> Scan:
+        self,
+        scan_type_to_run: ScanType,
+        last_scanned_commit: str,
+        scan_timestamp: str,
+        repository: Repository,
+        rule_pack: str,
+    ) -> Scan:
         raise NotImplementedError
 
     @abc.abstractmethod

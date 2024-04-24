@@ -12,7 +12,7 @@ from vcs_scanner.secret_scanners.cli import (
     determine_vcs_name,
     get_repository_name_from_url,
     guess_vcs_provider,
-    validate_cli_arguments
+    validate_cli_arguments,
 )
 
 
@@ -69,49 +69,50 @@ def test_determine_vcs_name_bitbucket():
 def test_create_cli_argparser_dir():
     parser = create_cli_argparser()
     assert isinstance(parser, ArgumentParser)
-    argv = 'dir --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --dir=/tmp'.split()
+    argv = "dir --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --dir=/tmp".split()
     args = parser.parse_args(argv)
     args = validate_cli_arguments(args)
     assert args is not False
     assert args.command == "dir"
-    assert args.gitleaks_path == PosixPath('/tmp')
-    assert args.gitleaks_rules_path == PosixPath('/tmp')
-    assert args.dir == PosixPath('/tmp')
+    assert args.gitleaks_path == PosixPath("/tmp")
+    assert args.gitleaks_rules_path == PosixPath("/tmp")
+    assert args.dir == PosixPath("/tmp")
 
 
 def test_create_cli_argparser_repo_local():
     parser = create_cli_argparser()
     assert isinstance(parser, ArgumentParser)
-    argv = 'repo local --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --dir=/tmp'.split()
+    argv = (
+        "repo local --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --dir=/tmp".split()
+    )
     args = parser.parse_args(argv)
     args = validate_cli_arguments(args)
     assert args is not False
     assert args.command == "repo"
     assert args.repository_location == "local"
-    assert args.gitleaks_path == PosixPath('/tmp')
-    assert args.gitleaks_rules_path == PosixPath('/tmp')
-    assert args.dir == PosixPath('/tmp')
+    assert args.gitleaks_path == PosixPath("/tmp")
+    assert args.gitleaks_rules_path == PosixPath("/tmp")
+    assert args.dir == PosixPath("/tmp")
 
 
 def test_create_cli_argparser_repo_remote():
     parser = create_cli_argparser()
     assert isinstance(parser, ArgumentParser)
-    argv = 'repo remote --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --repo-url=https://fake.url/repo'.split()
+    argv = "repo remote --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --repo-url=https://fake.url/repo".split()
     args = parser.parse_args(argv)
     args = validate_cli_arguments(args)
     assert args is not False
     assert args.command == "repo"
     assert args.repository_location == "remote"
-    assert args.gitleaks_path == PosixPath('/tmp')
-    assert args.gitleaks_rules_path == PosixPath('/tmp')
+    assert args.gitleaks_path == PosixPath("/tmp")
+    assert args.gitleaks_rules_path == PosixPath("/tmp")
     assert args.repo_url == "https://fake.url/repo"
 
 
 def test_create_cli_argparser_cli_tag():
     parser = create_cli_argparser()
     assert isinstance(parser, ArgumentParser)
-    argv = ('repo remote --gitleaks-path=/f --gitleaks-rules-path=/f --repo-url=https://url/ --include-tags=Cli,second'
-            .split())
+    argv = "repo remote --gitleaks-path=/f --gitleaks-rules-path=/f --repo-url=https://url/ --include-tags=Cli,second".split()
     args = parser.parse_args(argv)
     args = validate_cli_arguments(args)
     assert args is not False

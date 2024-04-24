@@ -10,16 +10,15 @@ import dateutil.parser
 logger = logging.getLogger(__name__)
 
 
-class IgnoredListProvider():  # pylint: disable=R0902
-
+class IgnoredListProvider:  # pylint: disable=R0902
     def __init__(self, ignore_findings_path: str):
         self.ignore_findings_path: str = ignore_findings_path
         self.today: datetime = datetime.now()
 
     def get_ignore_list(self) -> dict:
         """
-            Get the dictionary of ignored findings according to the file
-            The output will contain a dictionary with the findings id as the key and the tags as a list in the value
+        Get the dictionary of ignored findings according to the file
+        The output will contain a dictionary with the findings id as the key and the tags as a list in the value
         """
         ignored = {}
 
@@ -28,13 +27,15 @@ class IgnoredListProvider():  # pylint: disable=R0902
 
         try:
             # read dsv: `path|rule_name|line_number|expiry_date`
-            with open(self.ignore_findings_path, encoding="utf-8") as ignore_findings_file:
-                csv_ignore_list = csv.reader(ignore_findings_file, delimiter='|')
+            with open(
+                self.ignore_findings_path, encoding="utf-8"
+            ) as ignore_findings_file:
+                csv_ignore_list = csv.reader(ignore_findings_file, delimiter="|")
                 for row in csv_ignore_list:
                     expire: datetime = datetime.now()
 
                     # rows starting with # are comments
-                    if row[0][:1] == '#':
+                    if row[0][:1] == "#":
                         continue
 
                     if len(row) < 3:
@@ -50,7 +51,9 @@ class IgnoredListProvider():  # pylint: disable=R0902
                         try:
                             expire: datetime = dateutil.parser.isoparse(date)
                         except ValueError:
-                            logger.warning(f"Skipping: invalid date entry for {path}: {date}")
+                            logger.warning(
+                                f"Skipping: invalid date entry for {path}: {date}"
+                            )
                             continue
 
                     if expire < self.today:

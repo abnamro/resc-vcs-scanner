@@ -12,6 +12,7 @@ class EnvDefault(argparse.Action):
         This would result in the parser reading the env var if it exists and using it as the default,
         always to be overrideable using the cli argument.
     """
+
     def __init__(self, envvar, required=True, default=None, **kwargs):
         if not default and envvar:
             if envvar in os.environ:

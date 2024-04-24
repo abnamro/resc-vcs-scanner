@@ -12,8 +12,12 @@ def test_clone_repository(clone_from):
     repository_url = "https://fakeurl.com"
     repo_clone_path = "repo_clone_path"
 
-    clone_repository(username=username, personal_access_token=personal_access_token, repository_url=repository_url,
-                     repo_clone_path=repo_clone_path)
+    clone_repository(
+        username=username,
+        personal_access_token=personal_access_token,
+        repository_url=repository_url,
+        repo_clone_path=repo_clone_path,
+    )
 
     clone_from.assert_called_once()
     url = repository_url.replace("https://", "")
