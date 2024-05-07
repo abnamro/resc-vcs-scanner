@@ -9,3 +9,4 @@ tenacity==8.2.2
 prettytable==3.8.0
 termcolor==2.3.0
 tomlkit==0.12.1
+python-multipart==0.0.9
