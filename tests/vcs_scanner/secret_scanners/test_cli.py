@@ -82,9 +82,7 @@ def test_create_cli_argparser_dir():
 def test_create_cli_argparser_repo_local():
     parser = create_cli_argparser()
     assert isinstance(parser, ArgumentParser)
-    argv = (
-        "repo local --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --dir=/tmp".split()
-    )
+    argv = "repo local --gitleaks-path=/tmp --gitleaks-rules-path=/tmp --dir=/tmp".split()
     args = parser.parse_args(argv)
     args = validate_cli_arguments(args)
     assert args is not False

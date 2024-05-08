@@ -46,9 +46,7 @@ class VCSInstanceRuntime(BaseModel):
     def check_scheme(cls, value):
         allowed_schemes = ["http", "https"]
         if value not in allowed_schemes:
-            raise ValueError(
-                f"The scheme '{value}' must be one of the following {', '.join(allowed_schemes)}"
-            )
+            raise ValueError(f"The scheme '{value}' must be one of the following {', '.join(allowed_schemes)}")
         return value
 
     @validator("organization", pre=True)
@@ -56,9 +54,7 @@ class VCSInstanceRuntime(BaseModel):
     def check_organization(cls, value, values):
         if not value:
             if values["provider_type"] == VCSProviders.AZURE_DEVOPS:
-                raise ValueError(
-                    "The organization field needs to be specified for Azure devops vcs instances"
-                )
+                raise ValueError("The organization field needs to be specified for Azure devops vcs instances")
         return value
 
     @validator("scope", pre=True)
@@ -66,8 +62,7 @@ class VCSInstanceRuntime(BaseModel):
     def check_scope_and_exceptions(cls, value, values):
         if value and values["exceptions"]:
             raise ValueError(
-                "You cannot specify bot the scope and exceptions to the scan, only one setting"
-                " is supported."
+                "You cannot specify bot the scope and exceptions to the scan, only one setting" " is supported."
             )
         return value
 

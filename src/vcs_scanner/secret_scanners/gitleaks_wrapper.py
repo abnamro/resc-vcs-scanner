@@ -73,9 +73,7 @@ class GitLeaksWrapper:
                 return self._parse_output(self.report_filepath)
 
             error_output = result.stderr.decode("utf-8")
-            logger.error(
-                f"GitLeaks exited with an unexpected code: {exitcode}. Output: {error_output}"
-            )
+            logger.error(f"GitLeaks exited with an unexpected code: {exitcode}. Output: {error_output}")
             return None
 
         except subprocess.CalledProcessError as called_process_error:
@@ -88,9 +86,7 @@ class GitLeaksWrapper:
             return None
 
     @staticmethod
-    def _calculate_permanent_leak_url(
-        leak_url: str, repository: str, commit_id: str
-    ) -> str:
+    def _calculate_permanent_leak_url(leak_url: str, repository: str, commit_id: str) -> str:
         """
             The Leak URL given by bitbucket is not correct.
             Construct a proper one that links to the exact change in the commit
@@ -108,9 +104,7 @@ class GitLeaksWrapper:
 
         new_url = new_url.replace("/scm/", "/projects/")
         new_url = new_url.replace("/blob/", "/commits/")
-        new_url = new_url.replace(
-            f"/{repository}/", f"/repos/{repository[:-4]}/"
-        )  # remove .git at the end
+        new_url = new_url.replace(f"/{repository}/", f"/repos/{repository[:-4]}/")  # remove .git at the end
         new_url = new_url.replace(f"/{commit_id}/", f"/{commit_id}#")
 
         return new_url
@@ -118,8 +112,8 @@ class GitLeaksWrapper:
     @staticmethod
     def _is_valid_timestamp(timestamp: str) -> Optional[datetime.datetime]:
         try:
-            converted_timestamp: Optional[datetime.datetime] = (
-                datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
+            converted_timestamp: Optional[datetime.datetime] = datetime.datetime.strptime(
+                timestamp, "%Y-%m-%dT%H:%M:%S%z"
             )
         except ValueError:
             converted_timestamp = None
@@ -139,9 +133,7 @@ class GitLeaksWrapper:
         for result in results:
             commit_timestamp = cls._is_valid_timestamp(result["Date"])
             if not commit_timestamp:
-                logger.debug(
-                    f"{result['Date']} has an unexpected date format. Expected ISO 8601"
-                )
+                logger.debug(f"{result['Date']} has an unexpected date format. Expected ISO 8601")
                 commit_timestamp = datetime.datetime.now()
             finding = FindingBase(
                 file_path=result["File"],

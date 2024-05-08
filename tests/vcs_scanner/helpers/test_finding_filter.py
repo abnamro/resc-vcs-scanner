@@ -32,30 +32,22 @@ def test_finding_tag_filter_no_filter():
 
 
 def test_finding_tag_filter_match_include_filter():
-    result = should_process_finding(
-        finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=["tag"]
-    )
+    result = should_process_finding(finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=["tag"])
     assert result is True
 
 
 def test_finding_tag_filter_nomatch_include_filter():
-    result = should_process_finding(
-        finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=["resc"]
-    )
+    result = should_process_finding(finding=finding, rule_tags={"rule_1": ["tag"]}, include_tags=["resc"])
     assert result is False
 
 
 def test_finding_tag_filter_match_ignore_filter():
-    result = should_process_finding(
-        finding=finding, rule_tags={"rule_1": ["tag"]}, ignore_tags=["tag"]
-    )
+    result = should_process_finding(finding=finding, rule_tags={"rule_1": ["tag"]}, ignore_tags=["tag"])
     assert result is False
 
 
 def test_finding_tag_filter_nomatch_ignore_filter():
-    result = should_process_finding(
-        finding=finding, rule_tags={"rule_1": ["tag"]}, ignore_tags=["resc"]
-    )
+    result = should_process_finding(finding=finding, rule_tags={"rule_1": ["tag"]}, ignore_tags=["resc"])
     assert result is True
 
 

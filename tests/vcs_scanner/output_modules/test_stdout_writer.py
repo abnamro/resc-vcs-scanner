@@ -28,13 +28,11 @@ def test_write_correct_repository(info_log):
         repository_url="http://repository.url",
         vcs_instance=1,
     )
-    expected_call = (
-        f"Scanning repository {repository.project_key}/{repository.repository_name}"
-    )
+    expected_call = f"Scanning repository {repository.project_key}/{repository.repository_name}"
 
-    result = STDOUTWriter(
-        toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1
-    ).write_repository(repository)
+    result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1).write_repository(
+        repository
+    )
     assert result == repository
     info_log.assert_called_once_with(expected_call)
 
@@ -107,9 +105,9 @@ def test_write_findings_with_rules(info_log, exit_mock):
             )
         )
 
-    _ = STDOUTWriter(
-        toml_rule_file_path=str(toml_rule_path), exit_code_warn=2, exit_code_block=1
-    ).write_findings(1, 1, findings)
+    _ = STDOUTWriter(toml_rule_file_path=str(toml_rule_path), exit_code_warn=2, exit_code_block=1).write_findings(
+        1, 1, findings
+    )
     calls = [
         call(
             "\n"
@@ -255,9 +253,7 @@ def test_write_scan(info_log):
         rule_pack=rule_pack,
     )
     expected_call = f"Running {expected_result.scan_type} scan on repository {repository.repository_url}"
-    result = STDOUTWriter(
-        toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1
-    ).write_scan(
+    result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1).write_scan(
         expected_result.scan_type,
         expected_result.last_scanned_commit,
         expected_result.timestamp,

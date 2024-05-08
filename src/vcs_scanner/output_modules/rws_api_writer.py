@@ -57,9 +57,7 @@ class RESTAPIWriter(OutputModule):
         self.ignore_tags = ignore_tags
         self.include_tags = include_tags
 
-    def write_vcs_instance(
-        self, vcs_instance_runtime: VCSInstanceRuntime
-    ) -> Optional[VCSInstanceRead]:
+    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
         created_vcs_instance = None
         vcs_instance = VCSInstanceCreate(
             name=vcs_instance_runtime.name,
@@ -75,22 +73,16 @@ class RESTAPIWriter(OutputModule):
         if response.status_code == 201:
             created_vcs_instance = VCSInstanceRead(**json.loads(response.text))
         else:
-            logger.warning(
-                f"Creating vcs_instance failed with error: {response.status_code}->{response.text}"
-            )
+            logger.warning(f"Creating vcs_instance failed with error: {response.status_code}->{response.text}")
         return created_vcs_instance
 
-    def write_repository(
-        self, repository: RepositoryCreate
-    ) -> Optional[RepositoryRead]:
+    def write_repository(self, repository: RepositoryCreate) -> Optional[RepositoryRead]:
         created_repository = None
         response = create_repository(self.rws_url, repository)
         if response.status_code == 201:
             created_repository = RepositoryRead(**json.loads(response.text))
         else:
-            logger.warning(
-                f"Creating repository failed with error: {response.status_code}->{response.text}"
-            )
+            logger.warning(f"Creating repository failed with error: {response.status_code}->{response.text}")
         return created_repository
 
     def write_findings(
@@ -100,15 +92,9 @@ class RESTAPIWriter(OutputModule):
         scan_findings: List[FindingBase],
     ):
         findings_create = []
-        rule_tags = (
-            get_rule_tags(self.toml_rule_file_path)
-            if self.toml_rule_file_path
-            else None
-        )
+        rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
         for finding in scan_findings:
-            new_finding = FindingCreate.create_from_base_class(
-                base_object=finding, repository_id=repository_id
-            )
+            new_finding = FindingCreate.create_from_base_class(base_object=finding, repository_id=repository_id)
 
             if should_process_finding(
                 finding=finding,
@@ -122,12 +108,9 @@ class RESTAPIWriter(OutputModule):
 
         if response.status_code != 201:
             logger.warning(
-                f"Creating findings for scan {scan_id} "
-                f"failed with error: {response.status_code}->{response.text}"
+                f"Creating findings for scan {scan_id} " f"failed with error: {response.status_code}->{response.text}"
             )
-        logger.info(
-            f"Found {len(scan_findings)} issues during scan for scan_id: {scan_id} "
-        )
+        logger.info(f"Found {len(scan_findings)} issues during scan for scan_id: {scan_id} ")
 
     def write_scan(
         self,
@@ -151,9 +134,7 @@ class RESTAPIWriter(OutputModule):
         response = create_scan(self.rws_url, scan_object)
         if response.status_code == 201:
             created_scan = ScanRead(**json.loads(response.text))
-            logger.info(
-                f"Successfully created scan for repository {repository.repository_url} "
-            )
+            logger.info(f"Successfully created scan for repository {repository.repository_url} ")
         else:
             logger.warning(
                 f"Creating {scan_type_to_run} scan failed with error: {response.status_code}->{response.text}"
@@ -167,32 +148,22 @@ class RESTAPIWriter(OutputModule):
             if not response.text or response.text == "null":
                 return None
             return ScanRead(**json.loads(response.text))
-        logger.warning(
-            f"Retrieving last scan details failed with error: {response.status_code}->{response.text}"
-        )
+        logger.warning(f"Retrieving last scan details failed with error: {response.status_code}->{response.text}")
         return None
 
-    @retry(
-        wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(100)
-    )
-    def write_vcs_instances(
-        self, vcs_instances_dict: Dict[str, VCSInstanceRuntime]
-    ) -> Dict[str, VCSInstanceRuntime]:
+    @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(100))
+    def write_vcs_instances(self, vcs_instances_dict: Dict[str, VCSInstanceRuntime]) -> Dict[str, VCSInstanceRuntime]:
         try:
             for key in vcs_instances_dict:
                 vcs_instance = vcs_instances_dict[key]
                 vcs_instance_created = self.write_vcs_instance(vcs_instance)
                 if not vcs_instance_created:
-                    raise ValueError(
-                        f"Failed creating vcs instance {vcs_instance.name}"
-                    )
+                    raise ValueError(f"Failed creating vcs instance {vcs_instance.name}")
                 vcs_instance.id_ = vcs_instance_created.id_
                 vcs_instances_dict[key] = vcs_instance
             return vcs_instances_dict
         except ValueError as ex:
-            logger.error(
-                f"Failed creating vcs instances, is the API available? | {ex} | Retrying..."
-            )
+            logger.error(f"Failed creating vcs instances, is the API available? | {ex} | Retrying...")
             raise
 
     def get_active_rule_pack_version(self) -> str:
@@ -205,9 +176,7 @@ class RESTAPIWriter(OutputModule):
         response = get_rule_packs(url=self.rws_url, active=True)
         if response.status_code == 200:
             json_body = json.loads(response.text)
-            active_rule_pack_version = (
-                json_body["data"][0]["version"] if json_body else None
-            )
+            active_rule_pack_version = json_body["data"][0]["version"] if json_body else None
         else:
             logger.warning(
                 f"Retrieving active rule pack version failed with error: {response.status_code}->{response.text}"
@@ -234,9 +203,7 @@ class RESTAPIWriter(OutputModule):
             else:
                 rule_pack_version = get_rule_pack_version_from_file(response.content)
                 if not rule_pack_version:
-                    logger.warning(
-                        "Unable to obtain the rule pack version from downloaded file, defaulting to '0.0.0'"
-                    )
+                    logger.warning("Unable to obtain the rule pack version from downloaded file, defaulting to '0.0.0'")
                 logger.debug(
                     f"Latest rule pack version: {rule_pack_version} has been successfully "
                     f"downloaded to location {TEMP_RULE_FILE}"

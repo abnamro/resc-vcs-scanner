@@ -68,9 +68,7 @@ def scan_repository(repository):
     if not DOWNLOADED_RULE_PACK_VERSION:
         DOWNLOADED_RULE_PACK_VERSION = rws_writer.download_rule_pack()
 
-    active_rule_pack_version = rws_writer.check_active_rule_pack_version(
-        rule_pack_version=DOWNLOADED_RULE_PACK_VERSION
-    )
+    active_rule_pack_version = rws_writer.check_active_rule_pack_version(rule_pack_version=DOWNLOADED_RULE_PACK_VERSION)
 
     repository_runtime = RepositoryRuntime(**json.loads(repository))
 
@@ -89,18 +87,10 @@ def scan_repository(repository):
             vcs_instance=vcs_instance.id_,
         )
         # Split the include_tags by comma if supplied
-        include_tags = (
-            env_variables[RESC_INCLUDE_TAGS].split(",")
-            if env_variables[RESC_INCLUDE_TAGS]
-            else None
-        )
+        include_tags = env_variables[RESC_INCLUDE_TAGS].split(",") if env_variables[RESC_INCLUDE_TAGS] else None
 
         # Split the ignore_tags by comma if supplied
-        ignore_tags = (
-            env_variables[RESC_IGNORE_TAGS].split(",")
-            if env_variables[RESC_IGNORE_TAGS]
-            else None
-        )
+        ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
 
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],

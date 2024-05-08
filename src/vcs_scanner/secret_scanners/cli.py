@@ -51,8 +51,7 @@ def create_cli_argparser() -> ArgumentParser:
         action=EnvDefault,
         envvar="RESC_GITLEAKS_PATH",
         required=True,
-        help="Path to the gitleaks binary. "
-        "Can also be set via the RESC_GITLEAKS_PATH environment variable",
+        help="Path to the gitleaks binary. " "Can also be set via the RESC_GITLEAKS_PATH environment variable",
     )
     parser_common.add_argument(
         "--gitleaks-rules-path",
@@ -132,12 +131,9 @@ def create_cli_argparser() -> ArgumentParser:
         required=False,
         action=EnvDefault,
         envvar="RESC_REPO_NAME",
-        help="The name of the repository. "
-        "Can also be set via the RESC_REPO_NAME environment variable",
+        help="The name of the repository. " "Can also be set via the RESC_REPO_NAME environment variable",
     )
-    repository_common.add_argument(
-        "--force-base-scan", required=False, action="store_true"
-    )
+    repository_common.add_argument("--force-base-scan", required=False, action="store_true")
 
     repository_common.add_argument(
         "--rws-url",
@@ -152,18 +148,14 @@ def create_cli_argparser() -> ArgumentParser:
 
     parser: ArgumentParser = ArgumentParser()
 
-    subparser = parser.add_subparsers(
-        title="command", dest="command", required=True, help="Options dir, repo"
-    )
+    subparser = parser.add_subparsers(title="command", dest="command", required=True, help="Options dir, repo")
     directory = subparser.add_parser(
         "dir",
         description="Scan a directory",
         help="Scan a directory",
         parents=[parser_common],
     )
-    repository = subparser.add_parser(
-        "repo", description="Scan a Git repository", help="Scan a Git repository"
-    )
+    repository = subparser.add_parser("repo", description="Scan a Git repository", help="Scan a Git repository")
 
     directory.add_argument(
         "--dir",
@@ -210,8 +202,7 @@ def create_cli_argparser() -> ArgumentParser:
         required=True,
         action=EnvDefault,
         envvar="RESC_REPO_URL",
-        help="url to repository you want to scan. "
-        "Can also be set via the RESC_REPO_URL environment variable",
+        help="url to repository you want to scan. " "Can also be set via the RESC_REPO_URL environment variable",
     )
     repository_remote.add_argument(
         "--username",
@@ -252,27 +243,17 @@ def validate_cli_arguments(args: Namespace):  # pylint: disable=R0912
     """
     valid_arguments = True
     # Prompt for the password for a remote repo if username is specified
-    if (
-        args.command == "repo"
-        and args.repository_location == "remote"
-        and args.username
-    ):
+    if args.command == "repo" and args.repository_location == "remote" and args.username:
         if "RESC_REPO_PASSWORD" in os.environ:
             args.password = os.environ["RESC_REPO_PASSWORD"]
         else:
             args.password = getpass.getpass("Password:")
 
     # Derive the repository name from the directory or url if not provided
-    if (
-        args.command == "repo"
-        and args.repository_location == "remote"
-        and not args.repo_name
-    ):
+    if args.command == "repo" and args.repository_location == "remote" and not args.repo_name:
         args.repo_name = get_repository_name_from_url(args.repo_url)
     elif args.command == "dir" or (
-        args.command == "repo"
-        and args.repository_location == "local"
-        and not args.repo_name
+        args.command == "repo" and args.repository_location == "local" and not args.repo_name
     ):
         if not os.path.isdir(args.dir.absolute()):
             logger.error(f"The directory {args.dir.absolute()} does not exist")

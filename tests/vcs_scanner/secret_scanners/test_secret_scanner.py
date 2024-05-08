@@ -57,14 +57,10 @@ def test_clone_repo(clone_from):
     assert result == f"./{repository.repository_name}"
 
     url = repository.repository_url.replace("https://", "")
-    expected_repo_clone_path = (
-        f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    )
+    expected_repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
     expected_repo_clone_url = f"https://{username}:{personal_access_token}@{url}"
     clone_from.assert_called_once()
-    clone_from.assert_called_once_with(
-        expected_repo_clone_url, expected_repo_clone_path
-    )
+    clone_from.assert_called_once_with(expected_repo_clone_url, expected_repo_clone_path)
 
 
 @patch("vcs_scanner.secret_scanners.gitleaks_wrapper.GitLeaksWrapper.start_scan")
@@ -90,9 +86,7 @@ def test_scan_repo(start_scan):
         username=username,
         personal_access_token=personal_access_token,
     )
-    repo_clone_path = (
-        f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    )
+    repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
     result = secret_scanner.scan_repo(ScanType.BASE, None, repo_clone_path)
     assert result is None
     start_scan.assert_called_once()
@@ -118,9 +112,7 @@ def test_scan_directory(start_scan):
         username="",
         personal_access_token="",
     )
-    repo_clone_path = (
-        f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    )
+    repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
     result = secret_scanner.scan_directory(directory_path=repo_clone_path)
     assert result is None
     start_scan.assert_called_once()

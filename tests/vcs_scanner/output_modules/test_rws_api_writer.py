@@ -79,9 +79,7 @@ def test_write_incorrect_repository(warning, post):
     result = RESTAPIWriter(rws_url=url).write_repository(repository)
     assert result is None
     warning.assert_called_once()
-    warning.assert_called_with(
-        f"Creating repository failed with error: {404}->{expected_json}"
-    )
+    warning.assert_called_with(f"Creating repository failed with error: {404}->{expected_json}")
 
 
 @patch("requests.post")
@@ -113,9 +111,7 @@ def test_write_findings(info, post):
 
     _ = RESTAPIWriter(rws_url=url).write_findings(1, 1, findings)
     info.assert_called_once()
-    info.assert_called_with(
-        f"Found {len(findings)} issues during scan for scan_id: {1} "
-    )
+    info.assert_called_with(f"Found {len(findings)} issues during scan for scan_id: {1} ")
 
 
 @patch("requests.post")
@@ -129,9 +125,7 @@ def test_write_findings_unsuccessful(warning, post):
 
     _ = RESTAPIWriter(rws_url=url).write_findings(1, 1, findings)
     warning.assert_called_once()
-    warning.assert_called_with(
-        f"Creating findings for scan {1} " f"failed with error: {400}->{0}"
-    )
+    warning.assert_called_with(f"Creating findings for scan {1} " f"failed with error: {400}->{0}")
 
 
 @patch("requests.post")
@@ -206,9 +200,7 @@ def test_write_scan_unsuccessful(warning, post):
     )
     assert result is None
     warning.assert_called_once()
-    warning.assert_called_with(
-        f"Creating {expected_result.scan_type} scan failed with error: {400}->{expected_json}"
-    )
+    warning.assert_called_with(f"Creating {expected_result.scan_type} scan failed with error: {400}->{expected_json}")
 
 
 @patch("requests.get")
@@ -259,9 +251,7 @@ def test_get_last_scanned_commit_invalid_id(warning, get):
     result = RESTAPIWriter(rws_url=url).get_last_scan_for_repository(repository)
     assert result is None
     warning.assert_called_once()
-    warning.assert_called_with(
-        f"Retrieving last scan details failed with error: 404->{error_text}"
-    )
+    warning.assert_called_with(f"Retrieving last scan details failed with error: 404->{error_text}")
 
 
 @patch("requests.get")
@@ -308,9 +298,7 @@ def test_download_rule_pack_unsuccessful(error, get):
         )
 
 
-@patch(
-    "vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version"
-)
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version")
 @patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.download_rule_pack")
 def test_check_active_rule_pack_version_when_version_provided_equals_to_active_rule_pack_version(
     download_rule_pack, get_active_rule_pack_version
@@ -320,15 +308,11 @@ def test_check_active_rule_pack_version_when_version_provided_equals_to_active_r
     get_active_rule_pack_version.return_value = "0.0.1"
     download_rule_pack.return_value = "0.0.1"
 
-    rule_pack_version = RESTAPIWriter(rws_url=url).check_active_rule_pack_version(
-        rule_pack_version=version
-    )
+    rule_pack_version = RESTAPIWriter(rws_url=url).check_active_rule_pack_version(rule_pack_version=version)
     assert rule_pack_version is get_active_rule_pack_version.return_value
 
 
-@patch(
-    "vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version"
-)
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.get_active_rule_pack_version")
 @patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.download_rule_pack")
 def test_check_active_rule_pack_version_when_version_provided_not_equals_to_active_rule_pack_version(
     download_rule_pack, get_active_rule_pack_version
@@ -338,9 +322,7 @@ def test_check_active_rule_pack_version_when_version_provided_not_equals_to_acti
     get_active_rule_pack_version.return_value = "0.0.2"
     download_rule_pack.return_value = "0.0.2"
 
-    rule_pack_version = RESTAPIWriter(rws_url=url).check_active_rule_pack_version(
-        rule_pack_version=rule_pack_version
-    )
+    rule_pack_version = RESTAPIWriter(rws_url=url).check_active_rule_pack_version(rule_pack_version=rule_pack_version)
     assert rule_pack_version is download_rule_pack.return_value
 
 
@@ -352,9 +334,7 @@ def test_check_active_rule_pack_version_when_rule_pack_version_not_provided(
     rule_pack_version = None
     download_rule_pack.return_value = "0.0.1"
 
-    rule_pack_version = RESTAPIWriter(rws_url=url).check_active_rule_pack_version(
-        rule_pack_version=rule_pack_version
-    )
+    rule_pack_version = RESTAPIWriter(rws_url=url).check_active_rule_pack_version(rule_pack_version=rule_pack_version)
     assert rule_pack_version is download_rule_pack.return_value
 
 

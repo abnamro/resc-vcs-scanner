@@ -42,9 +42,7 @@ def generate_logger_config(log_file_path, debug=True):
         "version": 1,
         "disable_existing_loggers": False,
         "formatters": {
-            "generic-log-formatter": {
-                "format": "[%(levelname)s] [%(name)s] [%(asctime)s] %(message)s"
-            },
+            "generic-log-formatter": {"format": "[%(levelname)s] [%(name)s] [%(asctime)s] %(message)s"},
         },
         "handlers": {
             "console": {
@@ -91,9 +89,7 @@ def initialise_logs(log_file_path: str, debug=True):
 def load_vcs_instances(file_path: str) -> Dict[str, VCSInstanceRuntime]:
     vcs_instances_list: List[VCSInstanceRuntime] = parse_vcs_instances_file(file_path)
     if not vcs_instances_list:
-        logger.critical(
-            f"Exiting due to issues in VCS Instances definition in file {file_path}"
-        )
+        logger.critical(f"Exiting due to issues in VCS Instances definition in file {file_path}")
         sys.exit(-1)
     vcs_instances_map: Dict[str, VCSInstanceRuntime] = {
         vcs_instance.name: vcs_instance for vcs_instance in vcs_instances_list
@@ -103,7 +99,5 @@ def load_vcs_instances(file_path: str) -> Dict[str, VCSInstanceRuntime]:
 
 def get_rule_pack_version_from_file(file_content: str) -> Optional[str]:
     toml_rule_dictionary = tomlkit.loads(file_content)
-    rule_pack_version = (
-        toml_rule_dictionary["version"] if "version" in toml_rule_dictionary else None
-    )
+    rule_pack_version = toml_rule_dictionary["version"] if "version" in toml_rule_dictionary else None
     return rule_pack_version

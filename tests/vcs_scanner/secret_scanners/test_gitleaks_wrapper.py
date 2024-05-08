@@ -31,12 +31,9 @@ def test_repository_scanner_calculate_permanent_leak_url():
     commit_id = "123123123123123123123123123123"
     repo = "thisismyrepo.git"
 
-    leak_permalink = GitLeaksWrapper._calculate_permanent_leak_url(
-        leak_url, repo, commit_id
-    )
+    leak_permalink = GitLeaksWrapper._calculate_permanent_leak_url(leak_url, repo, commit_id)
     assert (
-        leak_permalink
-        == "https://bitbucket.com:1234/projects/ups/repos/thisismyrepo/commits/"
+        leak_permalink == "https://bitbucket.com:1234/projects/ups/repos/thisismyrepo/commits/"
         "123123123123123123123123123123#path/to/the/file.json"
     )
 
