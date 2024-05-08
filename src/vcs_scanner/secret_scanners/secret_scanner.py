@@ -60,9 +60,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             self.repo_display_name = self.repository.repository_url
 
     def clone_repo(self) -> str:
-        repo_clone_path = (
-            f"{self._scan_tmp_directory}/{self.repository.repository_name}"
-        )
+        repo_clone_path = f"{self._scan_tmp_directory}/{self.repository.repository_name}"
         clone_repository(
             self.repository.repository_url,
             repo_clone_path,
@@ -94,19 +92,11 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             )
             return
 
-        logger.info(
-            f"Scanning repository {self.repository.project_key}/{self.repository.repository_name}"
-        )
+        logger.info(f"Scanning repository {self.repository.project_key}/{self.repository.repository_name}")
 
         # Get last scanned commit for the repository
-        last_scan_for_repository = self._output_module.get_last_scan_for_repository(
-            repository=created_repository
-        )
-        last_scanned_commit = (
-            last_scan_for_repository.last_scanned_commit
-            if last_scan_for_repository
-            else None
-        )
+        last_scan_for_repository = self._output_module.get_last_scan_for_repository(repository=created_repository)
+        last_scanned_commit = last_scan_for_repository.last_scanned_commit if last_scan_for_repository else None
         scan_type_to_run = self.determine_scan_type(
             latest_commit=self.latest_commit,
             last_scan_for_repository=last_scan_for_repository,
@@ -135,9 +125,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             else:
                 repo_clone_path = self.local_path
 
-            findings = self.scan_repo(
-                scan_type_to_run, last_scanned_commit, repo_clone_path
-            )
+            findings = self.scan_repo(scan_type_to_run, last_scanned_commit, repo_clone_path)
             scan_timestamp_end = datetime.utcnow()
             logger.info(
                 f"Running {scan_type_to_run} scan on repository "
@@ -154,8 +142,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 )
             else:
                 logger.info(
-                    "No findings registered in "
-                    f"{self.repository.project_key}/{self.repository.repository_name}"
+                    "No findings registered in " f"{self.repository.project_key}/{self.repository.repository_name}"
                 )
         else:
             logger.info(
@@ -167,22 +154,16 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         """
         Scan the given non-git directory, set in the self.local_path variable
         """
-        logger.info(
-            f"Started task for scanning {self.local_path} using rule pack version: {self.rule_pack_version}"
-        )
+        logger.info(f"Started task for scanning {self.local_path} using rule pack version: {self.rule_pack_version}")
 
         scan_timestamp_start = datetime.utcnow()
         findings = self.scan_directory(self.local_path)
         scan_timestamp_end = datetime.utcnow()
-        logger.info(
-            f"Running local scan on {self.local_path} took {scan_timestamp_end - scan_timestamp_start} ms."
-        )
+        logger.info(f"Running local scan on {self.local_path} took {scan_timestamp_end - scan_timestamp_start} ms.")
 
         if findings:
             logger.info(f"Scan completed: {len(findings)} findings were found.")
-            self._output_module.write_findings(
-                repository_id=0, scan_id=0, scan_findings=findings
-            )
+            self._output_module.write_findings(repository_id=0, scan_id=0, scan_findings=findings)
         else:
             logger.info(f"No findings registered in {self.local_path}.")
 
@@ -227,28 +208,19 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             findings: Optional[List[FindingBase]] = gitleaks_command.start_scan()
             after_scan = time.time()
             scan_duration = int(after_scan - before_scan)
-            logger.info(
-                f"scan of repository {repo_clone_path} took {scan_duration} seconds"
-            )
+            logger.info(f"scan of repository {repo_clone_path} took {scan_duration} seconds")
             return findings
         except BaseException as error:
             logger.error(
-                f"An exception occurred while scanning repository {self.repository.repository_url} "
-                f"error: {error}"
+                f"An exception occurred while scanning repository {self.repository.repository_url} " f"error: {error}"
             )
         finally:
             # Make sure the tempfile and repo cloned path removed
             logger.debug(f"Cleaning up the temporary report: {report_filepath}")
             if os.path.exists(report_filepath):
                 os.remove(report_filepath)
-            if (
-                repo_clone_path
-                and not self.local_path
-                and os.path.exists(repo_clone_path)
-            ):
-                logger.debug(
-                    f"Cleaning up the repository cloned directory: {repo_clone_path}"
-                )
+            if repo_clone_path and not self.local_path and os.path.exists(repo_clone_path):
+                logger.debug(f"Cleaning up the repository cloned directory: {repo_clone_path}")
                 shutil.rmtree(repo_clone_path)
         return None
 
@@ -279,14 +251,10 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             findings: Optional[List[FindingBase]] = gitleaks_command.start_scan()
             after_scan = time.time()
             scan_duration = int(after_scan - before_scan)
-            logger.info(
-                f"scan of repository {directory_path} took {scan_duration} seconds"
-            )
+            logger.info(f"scan of repository {directory_path} took {scan_duration} seconds")
             return findings
         except BaseException as error:
-            logger.error(
-                f"An exception occurred while scanning directory {directory_path} error: {error}"
-            )
+            logger.error(f"An exception occurred while scanning directory {directory_path} error: {error}")
         finally:
             # Make sure the tempfile is removed
             logger.debug(f"Cleaning up the temporary report: {report_filepath}")
@@ -295,9 +263,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return None
 
     # Decide which type of scan to run
-    def determine_scan_type(
-        self, last_scan_for_repository: Scan, latest_commit: str = None
-    ):
+    def determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None):
         # Force base scan, or has no previous scan
         if self.force_base_scan or last_scan_for_repository is None:
             return ScanType.BASE
@@ -307,10 +273,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             if last_scan_for_repository.rule_pack != self.rule_pack_version:
                 return ScanType.BASE
             # Last commit is different from previous scan
-            if (
-                latest_commit
-                and latest_commit != last_scan_for_repository.last_scanned_commit
-            ):
+            if latest_commit and latest_commit != last_scan_for_repository.last_scanned_commit:
                 return ScanType.INCREMENTAL
         # Skip scanning, no conditions match
         return None

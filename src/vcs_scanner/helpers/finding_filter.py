@@ -23,19 +23,11 @@ def should_process_finding(
         The output will be boolean, based on the tag filter given
     """
     # Rule tag is not in the include tags list, return false
-    if (
-        include_tags
-        and rule_tags
-        and set(include_tags).isdisjoint(set(rule_tags.get(finding.rule_name, [])))
-    ):
+    if include_tags and rule_tags and set(include_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
         return False
 
     # Rule tag is in the ignore tags list, return false
-    if (
-        ignore_tags
-        and rule_tags
-        and not set(ignore_tags).isdisjoint(set(rule_tags.get(finding.rule_name, [])))
-    ):
+    if ignore_tags and rule_tags and not set(ignore_tags).isdisjoint(set(rule_tags.get(finding.rule_name, []))):
         return False
 
     return True

@@ -24,13 +24,9 @@ def parse_vcs_instances_file(filepath: str) -> List[VCSInstanceRuntime]:
             for vcs_instance in parsed_vcs_instances:
                 try:
                     logging.info(f"Parsing VCS instance '{vcs_instance}'")
-                    vcs_instances.append(
-                        VCSInstanceRuntime(**parsed_vcs_instances[vcs_instance])
-                    )
+                    vcs_instances.append(VCSInstanceRuntime(**parsed_vcs_instances[vcs_instance]))
                 except ValidationError as validation_error:
-                    logger.error(
-                        f"Failed while parsing VCS instance '{vcs_instance}': {validation_error}"
-                    )
+                    logger.error(f"Failed while parsing VCS instance '{vcs_instance}': {validation_error}")
                     errors_found = True
     except JSONDecodeError as json_error:
         logger.error(f"Failed to parse VCS instances file '{filepath}': {json_error}")

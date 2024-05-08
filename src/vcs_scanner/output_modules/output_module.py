@@ -15,9 +15,7 @@ from vcs_scanner.model import VCSInstanceRuntime
 
 class OutputModule(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def write_vcs_instance(
-        self, vcs_instance_runtime: VCSInstanceRuntime
-    ) -> Optional[VCSInstanceRead]:
+    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
         raise NotImplementedError
 
     @abc.abstractmethod

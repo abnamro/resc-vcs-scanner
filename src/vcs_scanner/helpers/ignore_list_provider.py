@@ -27,9 +27,7 @@ class IgnoredListProvider:  # pylint: disable=R0902
 
         try:
             # read dsv: `path|rule_name|line_number|expiry_date`
-            with open(
-                self.ignore_findings_path, encoding="utf-8"
-            ) as ignore_findings_file:
+            with open(self.ignore_findings_path, encoding="utf-8") as ignore_findings_file:
                 csv_ignore_list = csv.reader(ignore_findings_file, delimiter="|")
                 for row in csv_ignore_list:
                     expire: datetime = datetime.now()
@@ -51,9 +49,7 @@ class IgnoredListProvider:  # pylint: disable=R0902
                         try:
                             expire: datetime = dateutil.parser.isoparse(date)
                         except ValueError:
-                            logger.warning(
-                                f"Skipping: invalid date entry for {path}: {date}"
-                            )
+                            logger.warning(f"Skipping: invalid date entry for {path}: {date}")
                             continue
 
                     if expire < self.today:
