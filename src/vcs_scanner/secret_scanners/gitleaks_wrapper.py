@@ -61,8 +61,7 @@ class GitLeaksWrapper:
             result = subprocess.run(
                 self._build_gitleaks_command(),
                 check=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
             )
 
             exitcode = result.returncode
@@ -111,9 +110,7 @@ class GitLeaksWrapper:
     @staticmethod
     def _is_valid_timestamp(timestamp: str) -> datetime.datetime | None:
         try:
-            converted_timestamp: datetime.datetime | None = datetime.datetime.strptime(
-                timestamp, "%Y-%m-%dT%H:%M:%S%z"
-            )
+            converted_timestamp: datetime.datetime | None = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
         except ValueError:
             converted_timestamp = None
         return converted_timestamp
