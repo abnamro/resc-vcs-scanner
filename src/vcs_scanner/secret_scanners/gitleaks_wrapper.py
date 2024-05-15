@@ -3,7 +3,6 @@ import datetime
 import json
 import logging
 import subprocess
-from typing import List, Optional
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase
@@ -52,7 +51,7 @@ class GitLeaksWrapper:
             command.append(f"--log-opts={self.scan_from}..")
         return command
 
-    def start_scan(self) -> Optional[List[FindingBase]]:
+    def start_scan(self) -> list[FindingBase] | None:
         """
         :return: Output.
             If Successful, a list of FindingCreate objects is returned.
@@ -62,8 +61,7 @@ class GitLeaksWrapper:
             result = subprocess.run(
                 self._build_gitleaks_command(),
                 check=False,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
             )
 
             exitcode = result.returncode
@@ -110,17 +108,15 @@ class GitLeaksWrapper:
         return new_url
 
     @staticmethod
-    def _is_valid_timestamp(timestamp: str) -> Optional[datetime.datetime]:
+    def _is_valid_timestamp(timestamp: str) -> datetime.datetime | None:
         try:
-            converted_timestamp: Optional[datetime.datetime] = datetime.datetime.strptime(
-                timestamp, "%Y-%m-%dT%H:%M:%S%z"
-            )
+            converted_timestamp: datetime.datetime | None = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
         except ValueError:
             converted_timestamp = None
         return converted_timestamp
 
     @classmethod
-    def _parse_output(cls, file_path: str) -> List[FindingBase]:
+    def _parse_output(cls, file_path: str) -> list[FindingBase]:
         """
         Parse the gitleaks findings from the temp file and return a list of Finding objects
         :param file_path: the tempfile containing the gitleaks findings

@@ -6,7 +6,6 @@ import shutil
 import time
 import uuid
 from datetime import datetime
-from typing import List, Optional
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase
@@ -169,7 +168,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
     def scan_repo(
         self, scan_type_to_run: str, last_scanned_commit: str, repo_clone_path: str
-    ) -> Optional[List[FindingBase]]:
+    ) -> list[FindingBase] | None:
         """
             Clone and scan the given repository
         :param repo_clone_path:
@@ -205,7 +204,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             )
 
             before_scan = time.time()
-            findings: Optional[List[FindingBase]] = gitleaks_command.start_scan()
+            findings: list[FindingBase] | None = gitleaks_command.start_scan()
             after_scan = time.time()
             scan_duration = int(after_scan - before_scan)
             logger.info(f"scan of repository {repo_clone_path} took {scan_duration} seconds")
@@ -224,7 +223,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 shutil.rmtree(repo_clone_path)
         return None
 
-    def scan_directory(self, directory_path: str) -> Optional[List[FindingBase]]:
+    def scan_directory(self, directory_path: str) -> list[FindingBase] | None:
         """
             Scan the given directory
         :param directory_path:
@@ -248,7 +247,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             )
 
             before_scan = time.time()
-            findings: Optional[List[FindingBase]] = gitleaks_command.start_scan()
+            findings: list[FindingBase] | None = gitleaks_command.start_scan()
             after_scan = time.time()
             scan_duration = int(after_scan - before_scan)
             logger.info(f"scan of repository {directory_path} took {scan_duration} seconds")

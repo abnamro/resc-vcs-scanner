@@ -2,7 +2,6 @@
 import logging
 import sys
 from datetime import datetime
-from typing import List, Optional
 
 # Third Party
 from prettytable import PrettyTable
@@ -33,8 +32,8 @@ class STDOUTWriter(OutputModule):
         exit_code_warn: int,
         exit_code_block: int,
         toml_rule_file_path: str = None,
-        include_tags: List[str] = None,
-        ignore_tags: List[str] = None,
+        include_tags: list[str] = None,
+        ignore_tags: list[str] = None,
         working_dir: str = "",
         ignore_findings_path: str = "",
     ):
@@ -47,7 +46,7 @@ class STDOUTWriter(OutputModule):
         self.working_dir = working_dir
         self.ignore_findings_providers: IgnoredListProvider = IgnoredListProvider(ignore_findings_path)
 
-    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
+    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         vcs_instance = VCSInstanceRead(
             id_=1,
             name=vcs_instance_runtime.name,
@@ -125,7 +124,7 @@ class STDOUTWriter(OutputModule):
 
         return rule_action
 
-    def write_findings(self, scan_id: int, repository_id: int, scan_findings: List[FindingCreate]):
+    def write_findings(self, scan_id: int, repository_id: int, scan_findings: list[FindingCreate]):
         """
             Write the findings to the STDOUT in a nice table and set the exit code based on the FindingActions found
         :param scan_id:
@@ -241,7 +240,7 @@ class STDOUTWriter(OutputModule):
         scan_timestamp: datetime,
         repository: Repository,
         rule_pack: str,
-    ) -> Optional[ScanRead]:
+    ) -> ScanRead | None:
         logger.info(f"Running {scan_type_to_run} scan on repository {repository.repository_url}")
         return ScanRead(
             last_scanned_commit="NONE",

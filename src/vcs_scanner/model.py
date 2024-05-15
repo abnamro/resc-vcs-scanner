@@ -1,7 +1,6 @@
 # pylint: disable=no-name-in-module
 # Standard Library
 import os
-from typing import List, Optional
 
 # Third Party
 from pydantic import BaseModel, conint, constr, validator
@@ -15,7 +14,7 @@ class RepositoryRuntime(BaseModel):
     repository_url: str
     project_key: str
     vcs_instance_name: str
-    latest_commit: Optional[str] = None
+    latest_commit: str | None = None
 
     def convert_to_repository(self, vcs_instance_id: int) -> Repository:
         return Repository(
@@ -29,7 +28,7 @@ class RepositoryRuntime(BaseModel):
 
 
 class VCSInstanceRuntime(BaseModel):
-    id_: Optional[int]
+    id_: int | None
     name: constr(max_length=200)
     provider_type: VCSProviders
     hostname: constr(max_length=200)
@@ -37,9 +36,9 @@ class VCSInstanceRuntime(BaseModel):
     scheme: str
     username: constr(max_length=200)
     token: constr(max_length=200)
-    exceptions: Optional[List[str]] = []
-    scope: Optional[List[str]] = []
-    organization: Optional[str]
+    exceptions: list[str] | None = []
+    scope: list[str] | None = []
+    organization: str | None
 
     @validator("scheme", pre=True)
     @classmethod

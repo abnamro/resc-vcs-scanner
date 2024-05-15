@@ -1,6 +1,5 @@
 # Standard Library
 import abc
-from typing import List, Optional
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingCreate
@@ -15,7 +14,7 @@ from vcs_scanner.model import VCSInstanceRuntime
 
 class OutputModule(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
+    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -27,7 +26,7 @@ class OutputModule(metaclass=abc.ABCMeta):
         self,
         scan_id: int,
         repository_id: int,
-        scan_findings: List[FindingCreate],
+        scan_findings: list[FindingCreate],
     ):
         raise NotImplementedError
 
