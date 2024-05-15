@@ -110,7 +110,7 @@ def test_create_cli_argparser_repo_remote():
 def test_create_cli_argparser_cli_tag():
     parser = create_cli_argparser()
     assert isinstance(parser, ArgumentParser)
-    argv = "repo remote --gitleaks-path=/f --gitleaks-rules-path=/f --repo-url=https://url/ --include-tags=Cli,second".split()
+    argv = "repo remote --gitleaks-path=/f --gitleaks-rules-path=/f --repo-url=https://url/ --include-tags=Cli,second".split() # noqa: E501
     args = parser.parse_args(argv)
     args = validate_cli_arguments(args)
     assert args is not False

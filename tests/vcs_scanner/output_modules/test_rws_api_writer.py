@@ -259,7 +259,7 @@ def test_get_last_scanned_commit_invalid_id(warning, get):
 def test_download_rule_pack_successful(debug, get):
     url = "https://nonexistingwebsite.com"
     get.return_value.status_code = 200
-    get.return_value.content = "test-data".encode()
+    get.return_value.content = b"test-data"
     rule_pack_version = "0.0.1"
     out_file_path = "/tmp/temp_resc_rule.toml"
 

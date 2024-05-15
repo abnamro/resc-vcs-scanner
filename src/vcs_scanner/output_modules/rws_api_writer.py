@@ -5,7 +5,6 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 # Third Party
 from resc_backend.constants import TEMP_RULE_FILE
@@ -49,15 +48,15 @@ class RESTAPIWriter(OutputModule):
         self,
         rws_url,
         toml_rule_file_path: str = None,
-        ignore_tags: List[str] = None,
-        include_tags: List[str] = None,
+        ignore_tags: list[str] = None,
+        include_tags: list[str] = None,
     ):
         self.rws_url = rws_url
         self.toml_rule_file_path = toml_rule_file_path
         self.ignore_tags = ignore_tags
         self.include_tags = include_tags
 
-    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> Optional[VCSInstanceRead]:
+    def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         created_vcs_instance = None
         vcs_instance = VCSInstanceCreate(
             name=vcs_instance_runtime.name,
@@ -76,7 +75,7 @@ class RESTAPIWriter(OutputModule):
             logger.warning(f"Creating vcs_instance failed with error: {response.status_code}->{response.text}")
         return created_vcs_instance
 
-    def write_repository(self, repository: RepositoryCreate) -> Optional[RepositoryRead]:
+    def write_repository(self, repository: RepositoryCreate) -> RepositoryRead | None:
         created_repository = None
         response = create_repository(self.rws_url, repository)
         if response.status_code == 201:
@@ -89,7 +88,7 @@ class RESTAPIWriter(OutputModule):
         self,
         scan_id: int,
         repository_id: int,
-        scan_findings: List[FindingBase],
+        scan_findings: list[FindingBase],
     ):
         findings_create = []
         rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
@@ -152,7 +151,7 @@ class RESTAPIWriter(OutputModule):
         return None
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(100))
-    def write_vcs_instances(self, vcs_instances_dict: Dict[str, VCSInstanceRuntime]) -> Dict[str, VCSInstanceRuntime]:
+    def write_vcs_instances(self, vcs_instances_dict: dict[str, VCSInstanceRuntime]) -> dict[str, VCSInstanceRuntime]:
         try:
             for key in vcs_instances_dict:
                 vcs_instance = vcs_instances_dict[key]
@@ -183,7 +182,7 @@ class RESTAPIWriter(OutputModule):
             )
         return active_rule_pack_version
 
-    def download_rule_pack(self, rule_pack_version: Optional[str] = "") -> str:
+    def download_rule_pack(self, rule_pack_version: str | None = "") -> str:
         """
             Download rule pack
         :param rule_pack_version:
