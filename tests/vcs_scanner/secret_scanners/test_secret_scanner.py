@@ -1,6 +1,6 @@
 # Standard Library
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 from unittest.mock import patch
 
 # Third Party
@@ -156,7 +156,7 @@ def test_scan_type_is_base_when_a_latest_scan_is_present_and_rule_pack_is_latest
         repository_id=1,
         scan_type=ScanType.BASE,
         last_scanned_commit="latest_commit_1",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC),
         increment_number=0,
         rule_pack="2.0.2",
     )
@@ -173,7 +173,7 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
         repository_id=1,
         scan_type=ScanType.BASE,
         last_scanned_commit="latest_commit_1",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC),
         increment_number=0,
         rule_pack=secret_scanner.rule_pack_version,
     )
@@ -190,7 +190,7 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
         repository_id=1,
         scan_type=ScanType.BASE,
         last_scanned_commit="latest_commit_1",
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(UTC),
         increment_number=0,
         rule_pack=secret_scanner.rule_pack_version,
     )
