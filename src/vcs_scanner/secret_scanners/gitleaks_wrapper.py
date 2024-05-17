@@ -1,5 +1,5 @@
 # Standard Library
-import datetime
+from datetime import datetime, UTC
 import json
 import logging
 import subprocess
@@ -108,9 +108,9 @@ class GitLeaksWrapper:
         return new_url
 
     @staticmethod
-    def _is_valid_timestamp(timestamp: str) -> datetime.datetime | None:
+    def _is_valid_timestamp(timestamp: str) -> datetime | None:
         try:
-            converted_timestamp: datetime.datetime | None = datetime.datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
+            converted_timestamp: datetime | None = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
         except ValueError:
             converted_timestamp = None
         return converted_timestamp
@@ -130,7 +130,7 @@ class GitLeaksWrapper:
             commit_timestamp = cls._is_valid_timestamp(result["Date"])
             if not commit_timestamp:
                 logger.debug(f"{result['Date']} has an unexpected date format. Expected ISO 8601")
-                commit_timestamp = datetime.datetime.now()
+                commit_timestamp = datetime.now(UTC)
             finding = FindingBase(
                 file_path=result["File"],
                 line_number=result["StartLine"],

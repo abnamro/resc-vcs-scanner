@@ -1,7 +1,7 @@
 # Standard Library
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Third Party
 from prettytable import PrettyTable
@@ -40,8 +40,8 @@ class STDOUTWriter(OutputModule):
         self.toml_rule_file_path: str = toml_rule_file_path
         self.exit_code_warn: int = exit_code_warn
         self.exit_code_block: int = exit_code_block
-        self.include_tags: [str] = include_tags
-        self.ignore_tags: [str] = ignore_tags
+        self.include_tags: list[str] = include_tags
+        self.ignore_tags: list[str] = ignore_tags
         self.exit_code_success = 0
         self.working_dir = working_dir
         self.ignore_findings_providers: IgnoredListProvider = IgnoredListProvider(ignore_findings_path)
@@ -244,7 +244,7 @@ class STDOUTWriter(OutputModule):
         logger.info(f"Running {scan_type_to_run} scan on repository {repository.repository_url}")
         return ScanRead(
             last_scanned_commit="NONE",
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             repository_id=1,
             id_=1,
             rule_pack=rule_pack,

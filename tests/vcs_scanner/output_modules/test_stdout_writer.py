@@ -247,7 +247,7 @@ def test_write_scan(info_log):
     )
     expected_result = ScanRead(
         last_scanned_commit="NONE",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(UTC),
         repository_id=1,
         id_=1,
         rule_pack=rule_pack,
