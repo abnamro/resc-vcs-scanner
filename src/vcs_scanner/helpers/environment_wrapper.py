@@ -11,7 +11,7 @@ class EnvironmentVariable:
     required: bool = False
 
 
-def validate_environment(env_variables):
+def validate_environment(env_variables: list[EnvironmentVariable]) -> dict[str, EnvironmentVariable]:
     missing = []
     values = {}
     for env_variable in env_variables:

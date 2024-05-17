@@ -89,7 +89,7 @@ class RESTAPIWriter(OutputModule):
         scan_id: int,
         repository_id: int,
         scan_findings: list[FindingBase],
-    ):
+    ) -> None:
         findings_create = []
         rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
         for finding in scan_findings:
@@ -118,7 +118,7 @@ class RESTAPIWriter(OutputModule):
         scan_timestamp: datetime,
         repository: RepositoryRead,
         rule_pack: str,
-    ) -> ScanRead:
+    ) -> ScanRead | None:
         created_scan = None
         scan_object = ScanCreate.create_from_base_class(
             base_object=Scan(
@@ -141,14 +141,15 @@ class RESTAPIWriter(OutputModule):
 
         return created_scan
 
-    def get_last_scan_for_repository(self, repository: RepositoryRead) -> ScanRead:
+    def get_last_scan_for_repository(self, repository: RepositoryRead) -> ScanRead | None:
         response = get_last_scan_for_repository(self.rws_url, repository.id_)
-        if response.status_code == 200:
-            if not response.text or response.text == "null":
-                return None
-            return ScanRead(**json.loads(response.text))
-        logger.warning(f"Retrieving last scan details failed with error: {response.status_code}->{response.text}")
-        return None
+        if not response.status_code == 200:
+            logger.warning(f"Retrieving last scan details failed with error: {response.status_code}->{response.text}")
+            return None
+
+        if not response.text or response.text == "null":
+            return None
+        return ScanRead(**json.loads(response.text))
 
     @retry(wait=wait_exponential(multiplier=1, min=2, max=10), stop=stop_after_attempt(100))
     def write_vcs_instances(self, vcs_instances_dict: dict[str, VCSInstanceRuntime]) -> dict[str, VCSInstanceRuntime]:
@@ -165,7 +166,7 @@ class RESTAPIWriter(OutputModule):
             logger.error(f"Failed creating vcs instances, is the API available? | {ex} | Retrying...")
             raise
 
-    def get_active_rule_pack_version(self) -> str:
+    def get_active_rule_pack_version(self) -> str | None:
         """
             Retrieve active rule pack version from database
         :return: str
@@ -182,7 +183,7 @@ class RESTAPIWriter(OutputModule):
             )
         return active_rule_pack_version
 
-    def download_rule_pack(self, rule_pack_version: str | None = "") -> str:
+    def download_rule_pack(self, rule_pack_version: str | None = "") -> str | None:
         """
             Download rule pack
         :param rule_pack_version:
@@ -191,29 +192,29 @@ class RESTAPIWriter(OutputModule):
             Return downloaded rule pack version
         """
         response = download_rule_pack_toml_file(self.rws_url, rule_pack_version)
-        if response.status_code == 200:
-            filename = Path(TEMP_RULE_FILE)
-            filename.write_bytes(response.content)
-            if rule_pack_version:
-                logger.debug(
-                    f"Rule pack version: {rule_pack_version} has been successfully "
-                    f"downloaded to location {TEMP_RULE_FILE}"
-                )
-            else:
-                rule_pack_version = get_rule_pack_version_from_file(response.content)
-                if not rule_pack_version:
-                    logger.warning("Unable to obtain the rule pack version from downloaded file, defaulting to '0.0.0'")
-                logger.debug(
-                    f"Latest rule pack version: {rule_pack_version} has been successfully "
-                    f"downloaded to location {TEMP_RULE_FILE}"
-                )
-            return rule_pack_version
+        if not response.status_code == 200:
+            logger.error(
+                f"Aborting scan! Downloading rule pack version {rule_pack_version} failed with "
+                f"error: {response.status_code}->{response.text}"
+            )
+            sys.exit(-1)
 
-        logger.error(
-            f"Aborting scan! Downloading rule pack version {rule_pack_version} failed with "
-            f"error: {response.status_code}->{response.text}"
-        )
-        sys.exit(-1)
+        filename = Path(TEMP_RULE_FILE)
+        filename.write_bytes(response.content)
+        if rule_pack_version:
+            logger.debug(
+                f"Rule pack version: {rule_pack_version} has been successfully "
+                f"downloaded to location {TEMP_RULE_FILE}"
+            )
+        else:
+            rule_pack_version = get_rule_pack_version_from_file(response.content)
+            if not rule_pack_version:
+                logger.warning("Unable to obtain the rule pack version from downloaded file, defaulting to '0.0.0'")
+            logger.debug(
+                f"Latest rule pack version: {rule_pack_version} has been successfully "
+                f"downloaded to location {TEMP_RULE_FILE}"
+            )
+        return rule_pack_version
 
     def check_active_rule_pack_version(self, rule_pack_version: str = None) -> str:
         """

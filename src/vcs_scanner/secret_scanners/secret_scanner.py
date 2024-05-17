@@ -5,7 +5,7 @@ import os
 import shutil
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase
@@ -103,7 +103,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
         if scan_type_to_run:
             # Insert in to scan table
-            scan_timestamp_start = datetime.utcnow()
+            scan_timestamp_start = datetime.now(UTC)
             created_scan = self._output_module.write_scan(
                 scan_type_to_run,
                 self.latest_commit,
@@ -125,7 +125,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 repo_clone_path = self.local_path
 
             findings = self.scan_repo(scan_type_to_run, last_scanned_commit, repo_clone_path)
-            scan_timestamp_end = datetime.utcnow()
+            scan_timestamp_end = datetime.now(UTC)
             logger.info(
                 f"Running {scan_type_to_run} scan on repository "
                 f"{self.repository.project_key}/{self.repository.repository_name}"
@@ -155,9 +155,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         """
         logger.info(f"Started task for scanning {self.local_path} using rule pack version: {self.rule_pack_version}")
 
-        scan_timestamp_start = datetime.utcnow()
+        scan_timestamp_start = datetime.now(UTC)
         findings = self.scan_directory(self.local_path)
-        scan_timestamp_end = datetime.utcnow()
+        scan_timestamp_end = datetime.now(UTC)
         logger.info(f"Running local scan on {self.local_path} took {scan_timestamp_end - scan_timestamp_start} ms.")
 
         if findings:

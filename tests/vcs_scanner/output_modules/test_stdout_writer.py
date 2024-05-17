@@ -1,5 +1,5 @@
 # Standard Library
-from datetime import datetime
+from datetime import datetime, UTC
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -50,12 +50,12 @@ def test_write_findings(info_log, exit_mock):
                 column_end=i,
                 commit_id=f"commit_id_{i}",
                 commit_message=f"commit_message_{i}",
-                commit_timestamp=datetime.utcnow(),
+                commit_timestamp=datetime.now(UTC),
                 author=f"author_{i}",
                 email=f"email_{i}",
                 status=FindingStatus.NOT_ANALYZED,
                 comment=f"comment_{i}",
-                event_sent_on=datetime.utcnow(),
+                event_sent_on=datetime.now(UTC),
                 rule_name=f"rule_{i}",
             )
         )
@@ -95,12 +95,12 @@ def test_write_findings_with_rules(info_log, exit_mock):
                 column_end=i,
                 commit_id=f"commit_id_{i}",
                 commit_message=f"commit_message_{i}",
-                commit_timestamp=datetime.utcnow(),
+                commit_timestamp=datetime.now(UTC),
                 author=f"author_{i}",
                 email=f"email_{i}",
                 status=FindingStatus.NOT_ANALYZED,
                 comment=f"comment_{i}",
-                event_sent_on=datetime.utcnow(),
+                event_sent_on=datetime.now(UTC),
                 rule_name=f"rule_{i}",
             )
         )
@@ -144,12 +144,12 @@ def test_write_findings_with_rules_and_ignore(info_log, exit_mock):
                 column_end=i,
                 commit_id=f"commit_id_{i}",
                 commit_message=f"commit_message_{i}",
-                commit_timestamp=datetime.utcnow(),
+                commit_timestamp=datetime.now(UTC),
                 author=f"author_{i}",
                 email=f"email_{i}",
                 status=FindingStatus.NOT_ANALYZED,
                 comment=f"comment_{i}",
-                event_sent_on=datetime.utcnow(),
+                event_sent_on=datetime.now(UTC),
                 rule_name=f"rule_{i}",
             )
         )
@@ -196,12 +196,12 @@ def test_write_findings_with_rules_and_ignore_with_directory(info_log, exit_mock
                 column_end=i,
                 commit_id=f"commit_id_{i}",
                 commit_message=f"commit_message_{i}",
-                commit_timestamp=datetime.utcnow(),
+                commit_timestamp=datetime.now(UTC),
                 author=f"author_{i}",
                 email=f"email_{i}",
                 status=FindingStatus.NOT_ANALYZED,
                 comment=f"comment_{i}",
-                event_sent_on=datetime.utcnow(),
+                event_sent_on=datetime.now(UTC),
                 rule_name=f"rule_{i}",
             )
         )
@@ -247,7 +247,7 @@ def test_write_scan(info_log):
     )
     expected_result = ScanRead(
         last_scanned_commit="NONE",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(UTC),
         repository_id=1,
         id_=1,
         rule_pack=rule_pack,

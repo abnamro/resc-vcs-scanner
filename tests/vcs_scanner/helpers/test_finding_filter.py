@@ -1,5 +1,5 @@
 # Standard Library
-from datetime import datetime
+from datetime import datetime, UTC
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingCreate
@@ -16,7 +16,7 @@ finding = FindingCreate(
     column_end=1,
     commit_id=f"commit_id_{1}",
     commit_message=f"commit_message_{1}",
-    commit_timestamp=datetime.utcnow(),
+    commit_timestamp=datetime.now(UTC),
     author=f"author_{1}",
     email=f"email_{1}",
     status=FindingStatus.NOT_ANALYZED,

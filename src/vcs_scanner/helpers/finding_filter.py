@@ -6,8 +6,8 @@ from resc_backend.resc_web_service.schema.finding import FindingCreate
 def should_process_finding(
     finding: FindingCreate,
     rule_tags: dict = None,
-    include_tags: [str] = None,
-    ignore_tags: [str] = None,
+    include_tags: list[str] = None,
+    ignore_tags: list[str] = None,
 ) -> bool:
     """
         Determine the action to take for the finding, based on the rule tags
@@ -33,7 +33,7 @@ def should_process_finding(
     return True
 
 
-def get_rule_tags(toml_rule_file_path: str) -> dict:
+def get_rule_tags(toml_rule_file_path: str) -> dict[str, list[str]]:
     """
         Get the tags per rule from the .toml rule file, from self.toml_rule_file_path
     :return: dict.
@@ -51,11 +51,11 @@ def get_rule_tags(toml_rule_file_path: str) -> dict:
     return rule_tags
 
 
-def get_rule_comment(toml_rule_file_path: str) -> dict:
+def get_rule_comment(toml_rule_file_path: str) -> dict[str, str]:
     """
-        Get the tags per rule from the .toml rule file, from self.toml_rule_file_path
+        Get the comment per rule from the .toml rule file, from self.toml_rule_file_path
     :return: dict.
-        The output will contain a dictionary with the rule id as the key and the tags as a list in the value
+        The output will contain a dictionary with the rule id as the key and the comment as a string in the value
     """
     rule_comments = {}
     # read toml

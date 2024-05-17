@@ -1,7 +1,7 @@
 # Standard Library
 import json
 import os
-from datetime import datetime
+from datetime import datetime, UTC
 from unittest.mock import patch
 
 # Third Party
@@ -96,12 +96,12 @@ def test_write_findings(info, post):
                 column_end=i,
                 commit_id=f"commit_id_{i}",
                 commit_message=f"commit_message_{i}",
-                commit_timestamp=datetime.utcnow(),
+                commit_timestamp=datetime.now(UTC),
                 author=f"author_{i}",
                 email=f"email_{i}",
                 status=FindingStatus.NOT_ANALYZED,
                 comment=f"comment_{i}",
-                event_sent_on=datetime.utcnow(),
+                event_sent_on=datetime.now(UTC),
                 rule_name=f"rule_{i}",
             )
         )
@@ -143,7 +143,7 @@ def test_write_scan(post):
         id_=1,
         scan_type=ScanType.BASE,
         last_scanned_commit="123456789abcdef",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(UTC),
         increment_number=0,
         repository_id=repository.id_,
         rule_pack="0.0.0",
@@ -180,7 +180,7 @@ def test_write_scan_unsuccessful(warning, post):
         id_=1,
         scan_type=ScanType.BASE,
         last_scanned_commit="123456789abcdef",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(UTC),
         increment_number=0,
         repository_id=repository.id_,
         rule_pack="0.0.0",
@@ -217,7 +217,7 @@ def test_get_last_scan_for_repository(get):
     expected_result = ScanRead(
         id_=1,
         last_scanned_commit="561dsf651t34544",
-        timestamp=datetime.now(),
+        timestamp=datetime.now(UTC),
         increment_number=0,
         repository_id=1,
         rule_pack="0.0.0",
