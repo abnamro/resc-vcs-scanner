@@ -78,7 +78,7 @@ class IgnoredListProvider:  # pylint: disable=R0902
         date = row[3]
         try:
             expire: datetime = datetime.fromisoformat(date).replace(tzinfo=UTC)
-            
+
         except ValueError:
             logger.warning(f"Skipping: invalid date entry for {path}: {date}")
             return False
