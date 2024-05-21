@@ -2,6 +2,7 @@ from typing import Required, TypedDict
 
 
 # Move me to Backend later
+# https://github.com/gitleaks/gitleaks?tab=readme-ov-file#configuration
 class Allowlist(TypedDict, total=False):
     description: Required[str]
     paths: list[str]
@@ -26,8 +27,8 @@ class RuleToml(TypedDict, total=False):
     path: str
     secretGroup: int
     allowlist: RulesAllowlist
-    # from RESC
     tags: Required[list[str]]
+    # from RESC
     comment: str
 
 
