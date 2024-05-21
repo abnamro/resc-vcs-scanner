@@ -117,6 +117,7 @@ def scan_repository_from_cli():
         scan_repository(args)
 
 
+# TODO refactor and merge scan_directory / scan_repository to avoid code duplication.
 def scan_directory(args: Namespace):
     """
         Start the process of scanning a non-git directory
