@@ -212,6 +212,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
     def _run_repo_scan(self) -> True:
         if not self._as_repo:
             return True
+        
+        if self.gitleaks_rules_provider.scan_as_repo_rule_file_path is None:
+            return True
 
         logger.info(
             f"Started task for scanning {self._repo_clone_path} using rule pack version: {self.rule_pack_version}"
@@ -287,6 +290,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
     def _run_dir_scan(self):
         if not self._as_dir:
+            return True
+
+        if self.gitleaks_rules_provider.scan_as_dir_rule_file_path is None:
             return True
 
         logger.info(
