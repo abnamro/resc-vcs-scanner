@@ -4,6 +4,7 @@ import abc
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingCreate
 from resc_backend.resc_web_service.schema.repository import Repository
+from resc_backend.resc_web_service.schema.repository import RepositoryBase
 from resc_backend.resc_web_service.schema.scan import Scan, ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 from resc_backend.resc_web_service.schema.vcs_instance import VCSInstanceRead
@@ -22,7 +23,7 @@ class OutputModule(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def write_repository(self, repository: Repository) -> None:
+    def write_repository(self, repository: Repository) -> RepositoryBase | None:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -46,5 +47,5 @@ class OutputModule(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_last_scan_for_repository(self, repository: Repository) -> ScanRead:
+    def get_last_scan_for_repository(self, repository: Repository) -> ScanRead | None:
         raise NotImplementedError

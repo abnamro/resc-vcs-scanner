@@ -10,7 +10,9 @@ from datetime import datetime, UTC
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase
 from resc_backend.resc_web_service.schema.repository import Repository
+from resc_backend.resc_web_service.schema.repository import RepositoryBase
 from resc_backend.resc_web_service.schema.scan import Scan
+from resc_backend.resc_web_service.schema.scan import ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
@@ -55,121 +57,161 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self.local_path = local_path
         self.force_base_scan = force_base_scan
         self.latest_commit = latest_commit
+
+        self._created_repository: None | RepositoryBase = None
+        self._last_scanned_commit: None | str = None
+        self._scan_type_to_run: None | ScanType = None
+        self._scan_timestamp_start: None | datetime = None
+        self._created_scan: None | ScanRead = None
+        self._repo_clone_path: None | str = None
+        self._findings_from_repo: list[FindingBase] = []
+        self._findings_from_dir: list[FindingBase] = []
+        self._findings: list[FindingBase] = []
+
         if self.local_path:
             self.repo_display_name = self.local_path.replace(".", "_").replace("/", "_")
         else:
             self.repo_display_name = self.repository.repository_url
 
-    def run_scan(self, as_dir: bool = False, as_repo: bool = False, ) -> None:
+    def _is_valid(self, as_dir: bool = False, as_repo: bool = False) -> bool:
         if not as_dir and not as_repo:
             logger.error("no scan type selected")
-            return
+            return False
+        return True
 
+    def run_scan(self, as_dir: bool = False, as_repo: bool = False) -> None:
+        if not self._is_valid(as_dir, as_repo):
+            return
+        if not self._is_scan_needed():
+            return
+        if self._create_repository():
+            return  # Insert in to repository table (if necessary)
+        if not self._fetch_last_scanned_commit():
+            return
+        if not self._is_scan_needed():
+            return
+        self._scan_timestamp_start = datetime.now(UTC)
+        if not self._create_scan():
+            return  # Insert in to scan table (if necessary)
+        if not self._clone_repo():
+            return  # clone repo if path is not local.
         if as_repo:
-            self._run_repository_scan()
+            self._run_repo_scan()
 
         if as_dir:
-            self._run_directory_scan()
+            self._run_dir_scan()
 
+        if not self._merge_findings():
+            return  # No findings found.
+        self._write_findings()
 
-
-    def _run_repository_scan(self) -> None:
+    def _is_scan_needed(self) -> bool:
         if not self.latest_commit:
             # There is no latest commit for this repository, assuming that its empty
             logger.info(
                 f"Skipping scanning of {self.repository.project_key}/{self.repository.repository_name} "
                 f"there are no commits"
             )
-            return
+            return False
         logger.info(
             f"Started task for scanning {self.repository.repository_name} using "
             f"rule pack version: {self.rule_pack_version}"
         )
+        return True
 
+    def _create_repository(self) -> bool:
         # Insert in to repository table
-        created_repository = self._output_module.write_repository(self.repository)
-        if not created_repository:
+        self._created_repository = self._output_module.write_repository(self.repository)
+        if not self._created_repository:
             logger.error(
                 f"Error processing "
                 f"{self.repository.repository_name}."
-                f" Error details: unable to create repository: {created_repository}"
+                f" Error details: unable to create repository: {self._created_repository}"
             )
-            return
+            return False
 
         logger.info(f"Scanning repository {self.repository.project_key}/{self.repository.repository_name}")
+        return True
 
+    def _fetch_last_scanned_commit(self) -> True:
         # Get last scanned commit for the repository
-        last_scan_for_repository = self._output_module.get_last_scan_for_repository(repository=created_repository)
-        last_scanned_commit = last_scan_for_repository.last_scanned_commit if last_scan_for_repository else None
-        scan_type_to_run = self._determine_scan_type(
+        last_scan_for_repository = self._output_module.get_last_scan_for_repository(repository=self._created_repository)
+        self._last_scanned_commit = last_scan_for_repository.last_scanned_commit if last_scan_for_repository else None
+        self._scan_type_to_run = self._determine_scan_type(
             latest_commit=self.latest_commit,
             last_scan_for_repository=last_scan_for_repository,
         )
+        return True
 
-        if scan_type_to_run:
-            # Insert in to scan table
-            scan_timestamp_start = datetime.now(UTC)
-            created_scan = self._output_module.write_scan(
-                scan_type_to_run,
-                self.latest_commit,
-                scan_timestamp_start.isoformat(),
-                created_repository,
-                rule_pack=self.rule_pack_version,
-            )
-            if not created_scan:
-                logger.error(
-                    f"Error processing {self.repository.project_key}/{self.repository.repository_name} "
-                    f"Error details: unable to create scan object"
-                )
-                return
+    def _determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None):
+        # Force base scan, or has no previous scan
+        if self.force_base_scan or last_scan_for_repository is None:
+            return ScanType.BASE
+        # Has previous scan
+        if last_scan_for_repository:
+            # Rule-pack is different from previous scan
+            if last_scan_for_repository.rule_pack != self.rule_pack_version:
+                return ScanType.BASE
+            # Last commit is different from previous scan
+            if latest_commit and latest_commit != last_scan_for_repository.last_scanned_commit:
+                return ScanType.INCREMENTAL
+        # Skip scanning, no conditions match
+        return None
 
-            # Clone and run scan upon the repository
-            if not self.local_path:
-                repo_clone_path: str = self._clone_repo()
-            else:
-                repo_clone_path = self.local_path
-
-            findings = self._scan_repo(scan_type_to_run, last_scanned_commit, repo_clone_path)
-            scan_timestamp_end = datetime.now(UTC)
+    def _is_scan_needed(self) -> bool:
+        if self._scan_type_to_run is None:
             logger.info(
-                f"Running {scan_type_to_run} scan on repository "
-                f"{self.repository.project_key}/{self.repository.repository_name}"
-                f" took {scan_timestamp_end - scan_timestamp_start} ms."
-            )
-
-            if findings:
-                logger.info(f"Scan completed: {len(findings)} findings were found.")
-                self._output_module.write_findings(
-                    repository_id=created_repository.id_,
-                    scan_id=created_scan.id_,
-                    scan_findings=findings,
-                )
-            else:
-                logger.info(
-                    "No findings registered in " f"{self.repository.project_key}/{self.repository.repository_name}"
-                )
-        else:
-            logger.info(
-                f"Skipped {scan_type_to_run} scanning on repository: "
+                "Skipped scanning on repository: "
                 f"{self.repository.project_key}/{self.repository.repository_name} no new commits found."
             )
+            return False
+        return True
 
-    def _run_directory_scan(self) -> None:
-        """
-        Scan the given non-git directory, set in the self.local_path variable
-        """
-        logger.info(f"Started task for scanning {self.local_path} using rule pack version: {self.rule_pack_version}")
+    def _create_scan(self) -> bool:
+        self._created_scan = self._output_module.write_scan(
+            self._scan_type_to_run,
+            self.latest_commit,
+            self._scan_timestamp_start.isoformat(),
+            self._created_repository,
+            rule_pack=self.rule_pack_version,
+        )
+        if not self._created_scan:
+            logger.error(
+                f"Error processing {self.repository.project_key}/{self.repository.repository_name} "
+                f"Error details: unable to create scan object"
+            )
+            return False
+        return True
 
-        scan_timestamp_start = datetime.now(UTC)
-        findings = self._scan_directory(self.local_path)
-        scan_timestamp_end = datetime.now(UTC)
-        logger.info(f"Running local scan on {self.local_path} took {scan_timestamp_end - scan_timestamp_start} ms.")
-
-        if findings:
-            logger.info(f"Scan completed: {len(findings)} findings were found.")
-            self._output_module.write_findings(repository_id=0, scan_id=0, scan_findings=findings)
+    def _clone_repo(self) -> True:
+        # Clone and run scan upon the repository
+        if not self.local_path:
+            self._repo_clone_path = f"{self._scan_tmp_directory}/{self.repository.repository_name}"
+            clone_repository(
+                repository_url=self.repository.repository_url,
+                repo_clone_path=self._repo_clone_path,
+                username=self.username,
+                personal_access_token=self.personal_access_token,
+            )
         else:
-            logger.info(f"No findings registered in {self.local_path}.")
+            self._repo_clone_path = self.local_path
+        return True
+
+    def _run_repo_scan(self) -> True:
+        logger.info(
+            f"Started task for scanning {self._repo_clone_path} using rule pack version: {self.rule_pack_version}"
+        )
+        scan_timestamp_start = datetime.now(UTC)
+        self._findings_from_repo = self._scan_repo(
+            self._scan_type_to_run, self._last_scanned_commit, self._repo_clone_path
+        )
+        scan_timestamp_end = datetime.now(UTC)
+        logger.info(
+            f"Running {self._scan_type_to_run} scan on repository "
+            f"{self.repository.project_key}/{self.repository.repository_name}"
+            f" took {scan_timestamp_end - scan_timestamp_start} ms."
+        )
+        return True
 
     def _scan_repo(
         self, scan_type_to_run: str, last_scanned_commit: str, repo_clone_path: str
@@ -228,6 +270,20 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 shutil.rmtree(repo_clone_path)
         return None
 
+    def _run_dir_scan(self):
+        logger.info(
+            f"Started task for scanning {self._repo_clone_path} using rule pack version: {self.rule_pack_version}"
+        )
+
+        scan_timestamp_start = datetime.now(UTC)
+        self._findings_from_dir = self._scan_directory(self._repo_clone_path)
+        scan_timestamp_end = datetime.now(UTC)
+        logger.info(
+            f"Running directory scan on {self._repo_clone_path}"
+            f" took {scan_timestamp_end - scan_timestamp_start} ms."
+        )
+        return True
+
     def _scan_directory(self, directory_path: str) -> list[FindingBase] | None:
         """
             Scan the given directory
@@ -266,29 +322,23 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 os.remove(report_filepath)
         return None
 
-    # Decide which type of scan to run
-    def _determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None):
-        # Force base scan, or has no previous scan
-        if self.force_base_scan or last_scan_for_repository is None:
-            return ScanType.BASE
-        # Has previous scan
-        if last_scan_for_repository:
-            # Rule-pack is different from previous scan
-            if last_scan_for_repository.rule_pack != self.rule_pack_version:
-                return ScanType.BASE
-            # Last commit is different from previous scan
-            if latest_commit and latest_commit != last_scan_for_repository.last_scanned_commit:
-                return ScanType.INCREMENTAL
-        # Skip scanning, no conditions match
-        return None
+    def _merge_findings(self) -> bool:
+        if len(self._findings_from_dir) == 0 and len(self._findings_from_repo) == 0:
+            path = (
+                self.local_path
+                if self.local_path
+                else self.repository.project_key + "/" + self.repository.repository_name
+            )
+            logger.info(f"No findings registered in {path}.")
+            return False
 
+        self._findings = self._findings_from_repo + self._findings_from_dir
+        return True
 
-    def _clone_repo(self) -> str:
-        repo_clone_path = f"{self._scan_tmp_directory}/{self.repository.repository_name}"
-        clone_repository(
-            self.repository.repository_url,
-            repo_clone_path,
-            username=self.username,
-            personal_access_token=self.personal_access_token,
+    def _write_findings(self) -> True:
+        logger.info(f"Scan completed: {len(self._findings)} findings were found.")
+        self._output_module.write_findings(
+            repository_id=self._created_repository.id_,
+            scan_id=self._created_scan.id_,
+            scan_findings=self._findings,
         )
-        return repo_clone_path

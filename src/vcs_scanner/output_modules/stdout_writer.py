@@ -254,7 +254,7 @@ class STDOUTWriter(OutputModule):
             rule_pack=rule_pack,
         )
 
-    def get_last_scan_for_repository(self, repository: Repository) -> ScanRead:
+    def get_last_scan_for_repository(self, repository: Repository) -> ScanRead | None:
         return None
 
     @staticmethod

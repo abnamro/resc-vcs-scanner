@@ -151,6 +151,9 @@ def scan_directory(args: Namespace):
         username="",
         personal_access_token="",
         local_path=f"{args.dir.absolute()}",
+        # we force a base scan because it does not matter
+        # in this use case: we are not sending data to RESC.
+        force_base_scan=True,
     )
 
     secret_scanner.run_scan(as_dir=True)

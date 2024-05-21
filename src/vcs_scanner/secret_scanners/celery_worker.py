@@ -6,7 +6,7 @@ import os
 # Third Party
 from celery import Celery
 from celery.utils.log import get_task_logger
-from resc_backend.constants import TEMP_RULE_FILE
+from resc_backend.constants import TEMP_RULE_FILE, TEMP_RULE_DIR_FILE, TEMP_RULE_REPO_FILE
 from resc_backend.resc_web_service.schema.repository import Repository
 
 # First Party
@@ -101,7 +101,11 @@ def scan_repository(repository):
             rws_url=rws_url, include_tags=include_tags, ignore_tags=ignore_tags, rule_tag_provider=rule_tag_provider
         )
 
-        gitleaks_rules_provider = RuleFileProvider(TEMP_RULE_FILE, init=True)
+        gitleaks_rules_provider = RuleFileProvider(TEMP_RULE_FILE)
+        gitleaks_rules_provider.init(
+            destination_rule_as_repo=TEMP_RULE_REPO_FILE,
+            destination_rule_as_dir=TEMP_RULE_DIR_FILE,
+        )
 
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
