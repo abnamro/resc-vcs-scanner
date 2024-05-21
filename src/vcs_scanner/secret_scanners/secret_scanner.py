@@ -6,6 +6,7 @@ import shutil
 import time
 import uuid
 from datetime import datetime, UTC
+from typing import Callable
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase
@@ -58,6 +59,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self.force_base_scan = force_base_scan
         self.latest_commit = latest_commit
 
+        self._as_dir: bool = False,
+        self._as_repo: bool = False,
         self._created_repository: None | RepositoryBase = None
         self._last_scanned_commit: None | str = None
         self._scan_type_to_run: None | ScanType = None
@@ -81,37 +84,32 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             as_dir (bool, optional): whether we scan as directory. Defaults to False.
             as_repo (bool, optional): whether we scan as repository. Defaults to False.
         """
+        self._as_dir = as_dir
+        self._as_repo = as_repo
 
-        if not self._is_valid(as_dir, as_repo):
-            return
+        pipes: list[Callable[[],bool]] = [
+            self._is_valid,
+            self._is_scan_needed_from_latest_commit,
+            self._create_repository,
+            self._fetch_last_scanned_commit,
+            self._is_scan_needed,
+            self._start_timer,
+            self._create_scan,
+            self._clone_repo,
+            self._run_repo_scan,
+            self._run_dir_scan,
+            self._merge_findings,
+            self._write_findings,
+        ]
 
-        if not self._is_scan_needed_from_latest_commit():
-            return
-        if self._create_repository():
-            return  # Insert in to repository table (if necessary)
-        if not self._fetch_last_scanned_commit():
-            return
-        if not self._is_scan_needed():
-            return
-        self._scan_timestamp_start = datetime.now(UTC)
-        if not self._create_scan():
-            return  # Insert in to scan table (if necessary)
-        if not self._clone_repo():
-            return  # clone repo if path is not local.
-        if as_repo:
-            self._run_repo_scan()
-
-        if as_dir:
-            self._run_dir_scan()
-
-        if not self._merge_findings():
-            return  # No findings found.
-        self._write_findings()
+        for pipe in pipes:
+            # If the pipe does not succeed we exit immediately.
+            if not pipe():
+                return
 
 
-
-    def _is_valid(self, as_dir: bool = False, as_repo: bool = False) -> bool:
-        if not as_dir and not as_repo:
+    def _is_valid(self) -> bool:
+        if not self._as_dir and not self._as_repo:
             logger.error("no scan type selected")
             return False
         return True
@@ -119,7 +117,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
 
     def _is_scan_needed_from_latest_commit(self) -> bool:
-        if not self.latest_commit:
+        if self._as_repo and not self.latest_commit:
             # There is no latest commit for this repository, assuming that its empty
             logger.info(
                 f"Skipping scanning of {self.repository.project_key}/{self.repository.repository_name} "
@@ -156,7 +154,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         )
         return True
 
-    def _determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None):
+    def _determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None) -> ScanType | None:
         # Force base scan, or has no previous scan
         if self.force_base_scan or last_scan_for_repository is None:
             return ScanType.BASE
@@ -178,6 +176,10 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 f"{self.repository.project_key}/{self.repository.repository_name} no new commits found."
             )
             return False
+        return True
+    
+    def _start_timer(self) -> True:
+        self._scan_timestamp_start = datetime.now(UTC)
         return True
 
     def _create_scan(self) -> bool:
@@ -211,6 +213,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return True
 
     def _run_repo_scan(self) -> True:
+        if not self._as_repo:
+            return True
+
         logger.info(
             f"Started task for scanning {self._repo_clone_path} using rule pack version: {self.rule_pack_version}"
         )
@@ -284,6 +289,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return None
 
     def _run_dir_scan(self):
+        if not self._as_dir:
+            return True
+
         logger.info(
             f"Started task for scanning {self._repo_clone_path} using rule pack version: {self.rule_pack_version}"
         )
@@ -355,3 +363,4 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             scan_id=self._created_scan.id_,
             scan_findings=self._findings,
         )
+        return True
