@@ -60,17 +60,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         else:
             self.repo_display_name = self.repository.repository_url
 
-    def clone_repo(self) -> str:
-        repo_clone_path = f"{self._scan_tmp_directory}/{self.repository.repository_name}"
-        clone_repository(
-            self.repository.repository_url,
-            repo_clone_path,
-            username=self.username,
-            personal_access_token=self.personal_access_token,
-        )
-        return repo_clone_path
-
-    def run_scan(self, as_dir: bool = False, as_repo: bool = False) -> None:
+    def run_scan(self, as_dir: bool = False, as_repo: bool = False, ) -> None:
         if not as_dir and not as_repo:
             logger.error("no scan type selected")
             return
@@ -80,6 +70,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
         if as_dir:
             self._run_directory_scan()
+
+
 
     def _run_repository_scan(self) -> None:
         if not self.latest_commit:
@@ -109,7 +101,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         # Get last scanned commit for the repository
         last_scan_for_repository = self._output_module.get_last_scan_for_repository(repository=created_repository)
         last_scanned_commit = last_scan_for_repository.last_scanned_commit if last_scan_for_repository else None
-        scan_type_to_run = self.determine_scan_type(
+        scan_type_to_run = self._determine_scan_type(
             latest_commit=self.latest_commit,
             last_scan_for_repository=last_scan_for_repository,
         )
@@ -133,7 +125,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
             # Clone and run scan upon the repository
             if not self.local_path:
-                repo_clone_path: str = self.clone_repo()
+                repo_clone_path: str = self._clone_repo()
             else:
                 repo_clone_path = self.local_path
 
@@ -275,7 +267,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return None
 
     # Decide which type of scan to run
-    def determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None):
+    def _determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None):
         # Force base scan, or has no previous scan
         if self.force_base_scan or last_scan_for_repository is None:
             return ScanType.BASE
@@ -289,3 +281,14 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 return ScanType.INCREMENTAL
         # Skip scanning, no conditions match
         return None
+
+
+    def _clone_repo(self) -> str:
+        repo_clone_path = f"{self._scan_tmp_directory}/{self.repository.repository_name}"
+        clone_repository(
+            self.repository.repository_url,
+            repo_clone_path,
+            username=self.username,
+            personal_access_token=self.personal_access_token,
+        )
+        return repo_clone_path

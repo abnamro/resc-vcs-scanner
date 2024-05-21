@@ -53,7 +53,7 @@ def test_clone_repo(clone_from):
         personal_access_token=personal_access_token,
     )
 
-    result = secret_scanner.clone_repo()
+    result = secret_scanner._clone_repo()
     assert result == f"./{repository.repository_name}"
 
     url = repository.repository_url.replace("https://", "")
@@ -144,7 +144,7 @@ def initialize_and_get_repo_scanner():
 def test_scan_type_is_base_when_a_latest_scan_is_not_present():
     secret_scanner = initialize_and_get_repo_scanner()
 
-    scan_type = secret_scanner.determine_scan_type(None)
+    scan_type = secret_scanner._determine_scan_type(None)
     assert scan_type == ScanType.BASE
 
 
@@ -161,7 +161,7 @@ def test_scan_type_is_base_when_a_latest_scan_is_present_and_rule_pack_is_latest
         rule_pack="2.0.2",
     )
 
-    scan_type = secret_scanner.determine_scan_type(scan_read, "latest_commit")
+    scan_type = secret_scanner._determine_scan_type(scan_read, "latest_commit")
     assert scan_type == ScanType.BASE
 
 
@@ -178,7 +178,7 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
         rule_pack=secret_scanner.rule_pack_version,
     )
 
-    scan_type = secret_scanner.determine_scan_type(scan_read, "latest_commit")
+    scan_type = secret_scanner._determine_scan_type(scan_read, "latest_commit")
     assert scan_type == ScanType.INCREMENTAL
 
 
@@ -195,5 +195,5 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
         rule_pack=secret_scanner.rule_pack_version,
     )
 
-    scan_type = secret_scanner.determine_scan_type(scan_read, "latest_commit")
+    scan_type = secret_scanner._determine_scan_type(scan_read, "latest_commit")
     assert scan_type == ScanType.INCREMENTAL

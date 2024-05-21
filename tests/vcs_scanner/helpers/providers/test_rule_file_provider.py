@@ -50,7 +50,7 @@ def test_rule_file_provider_no_rules(resource):
 def test_rule_file_provider_rules_repo(resource):
     provider = RuleFileProvider(TOML_RULE_PATH)
     provider.init(TOML_TMP_FILE_SCAN_AS_REPO, TOML_TMP_FILE_SCAN_AS_DIR)
-    assert provider.scan_as_repo_rule_file_path is not None
+    assert provider.scan_as_repo_rule_file_path == TOML_TMP_FILE_SCAN_AS_REPO
     assert os.path.exists(TOML_TMP_FILE_SCAN_AS_REPO)
     assert provider.scan_as_dir_rule_file_path is None
     assert not os.path.exists(TOML_TMP_FILE_SCAN_AS_DIR)
@@ -61,14 +61,23 @@ def test_rule_file_provider_rules_scan_as_dir(resource):
     provider.init(TOML_TMP_FILE_SCAN_AS_REPO, TOML_TMP_FILE_SCAN_AS_DIR)
     assert provider.scan_as_repo_rule_file_path is None
     assert not os.path.exists(TOML_TMP_FILE_SCAN_AS_REPO)
-    assert provider.scan_as_dir_rule_file_path is not None
+    assert provider.scan_as_dir_rule_file_path == TOML_TMP_FILE_SCAN_AS_DIR
     assert os.path.exists(TOML_TMP_FILE_SCAN_AS_DIR)
 
 
 def test_rule_file_provider_rules_mixed(resource):
     provider = RuleFileProvider(TOML_SCAN_MIXED_PATH)
     provider.init(TOML_TMP_FILE_SCAN_AS_REPO, TOML_TMP_FILE_SCAN_AS_DIR)
-    assert provider.scan_as_repo_rule_file_path is not None
+    assert provider.scan_as_repo_rule_file_path == TOML_TMP_FILE_SCAN_AS_REPO
     assert os.path.exists(TOML_TMP_FILE_SCAN_AS_REPO)
-    assert provider.scan_as_dir_rule_file_path is not None
+    assert provider.scan_as_dir_rule_file_path == TOML_TMP_FILE_SCAN_AS_DIR
     assert os.path.exists(TOML_TMP_FILE_SCAN_AS_DIR)
+
+
+def test_rule_file_provider_skip_split(resource):
+    provider = RuleFileProvider(TOML_SCAN_MIXED_PATH)
+    provider.init(TOML_SCAN_MIXED_PATH, TOML_SCAN_MIXED_PATH)
+    assert provider.scan_as_repo_rule_file_path == TOML_SCAN_MIXED_PATH
+    assert not os.path.exists(TOML_TMP_FILE_SCAN_AS_REPO)
+    assert provider.scan_as_dir_rule_file_path == TOML_SCAN_MIXED_PATH
+    assert not os.path.exists(TOML_TMP_FILE_SCAN_AS_DIR)

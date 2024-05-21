@@ -14,6 +14,11 @@ class RuleFileProvider:
         self.scan_as_dir_rule_file_path: str | None = None
 
     def init(self, destination_rule_as_repo: str, destination_rule_as_dir: str) -> None:
+        if destination_rule_as_repo == self.base_rule_file_path and destination_rule_as_dir == self.base_rule_file_path:
+            self.scan_as_repo_rule_file_path = destination_rule_as_repo
+            self.scan_as_dir_rule_file_path = destination_rule_as_dir
+            return None
+
         if self.scan_as_dir_rule_file_path is not None or self.scan_as_repo_rule_file_path is not None:
             return None
 
