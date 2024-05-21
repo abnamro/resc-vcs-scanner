@@ -1,5 +1,4 @@
 # Third Party
-import tomlkit
 from resc_backend.resc_web_service.schema.finding import FindingCreate
 
 

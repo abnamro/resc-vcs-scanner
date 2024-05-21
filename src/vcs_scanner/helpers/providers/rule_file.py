@@ -59,8 +59,10 @@ class RuleFileProvider:
         try:
             with open(destination, "w") as f:
                 tomlkit.dump(new_toml_dict, f)
-        except:  # <- File does not exists: we just fail silently
-            logger.error(f"could not write in {destination}")
+        except OSError as err:
+            logger.error(f"could not write in {destination}: {err}")
+        except Exception as err:
+            logger.error(f"Unexpected {err=}, {type(err)=}")
             return False
 
         return True
