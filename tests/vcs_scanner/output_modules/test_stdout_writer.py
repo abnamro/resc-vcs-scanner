@@ -14,6 +14,9 @@ from resc_backend.resc_web_service.schema.scan import ScanRead
 
 # First Party
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
+from vcs_scanner.helpers.providers.ignore_list import IgnoredListProvider
+from vcs_scanner.helpers.providers.rule_comment import RuleCommentProvider
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 
 THIS_DIR = Path(__file__).parent.parent
 
@@ -30,9 +33,18 @@ def test_write_correct_repository(info_log):
     )
     expected_call = f"Scanning repository {repository.project_key}/{repository.repository_name}"
 
-    result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1).write_repository(
-        repository
-    )
+    rule_tag_provider = RuleTagProvider()
+    rule_tag_provider.load("toml_path")
+
+    rule_comment_provider = RuleCommentProvider()
+    rule_comment_provider.load("toml_path")
+
+    result = STDOUTWriter(
+        exit_code_warn=2,
+        exit_code_block=1,
+        rule_tag_provider=rule_comment_provider,
+        rule_comment_provider=rule_comment_provider,
+    ).write_repository(repository)
     assert result == repository
     info_log.assert_called_once_with(expected_call)
 
@@ -59,7 +71,6 @@ def test_write_findings(info_log, exit_mock):
                 rule_name=f"rule_{i}",
             )
         )
-
     _ = STDOUTWriter(exit_code_warn=2, exit_code_block=1).write_findings(1, 1, findings)
     calls = [
         call(
@@ -104,10 +115,18 @@ def test_write_findings_with_rules(info_log, exit_mock):
                 rule_name=f"rule_{i}",
             )
         )
+    rule_tag_provider = RuleTagProvider()
+    rule_tag_provider.load(str(toml_rule_path))
 
-    _ = STDOUTWriter(toml_rule_file_path=str(toml_rule_path), exit_code_warn=2, exit_code_block=1).write_findings(
-        1, 1, findings
-    )
+    rule_comment_provider = RuleCommentProvider()
+    rule_comment_provider.load(str(toml_rule_path))
+
+    _ = STDOUTWriter(
+        exit_code_warn=2,
+        exit_code_block=1,
+        rule_tag_provider=rule_tag_provider,
+        rule_comment_provider=rule_comment_provider,
+    ).write_findings(1, 1, findings)
     calls = [
         call(
             "\n"
@@ -154,11 +173,20 @@ def test_write_findings_with_rules_and_ignore(info_log, exit_mock):
             )
         )
 
+    rule_tag_provider = RuleTagProvider()
+    rule_tag_provider.load(str(toml_rule_path))
+
+    rule_comment_provider = RuleCommentProvider()
+    rule_comment_provider.load(str(toml_rule_path))
+
+    ignore_findings_providers = IgnoredListProvider(ignore_list_path)
+
     _ = STDOUTWriter(
-        toml_rule_file_path=str(toml_rule_path),
         exit_code_warn=2,
         exit_code_block=1,
-        ignore_findings_path=ignore_list_path,
+        rule_tag_provider=rule_tag_provider,
+        rule_comment_provider=rule_comment_provider,
+        ignore_findings_providers=ignore_findings_providers,
     ).write_findings(1, 1, findings)
     calls = [
         call(
@@ -206,12 +234,21 @@ def test_write_findings_with_rules_and_ignore_with_directory(info_log, exit_mock
             )
         )
 
+    rule_tag_provider = RuleTagProvider()
+    rule_tag_provider.load(str(toml_rule_path))
+
+    rule_comment_provider = RuleCommentProvider()
+    rule_comment_provider.load(str(toml_rule_path))
+
+    ignore_findings_providers = IgnoredListProvider(ignore_list_path)
+
     _ = STDOUTWriter(
-        toml_rule_file_path=str(toml_rule_path),
         exit_code_warn=2,
         exit_code_block=1,
         working_dir="directory_path/",
-        ignore_findings_path=ignore_list_path,
+        rule_tag_provider=rule_tag_provider,
+        rule_comment_provider=rule_comment_provider,
+        ignore_findings_providers=ignore_findings_providers,
     ).write_findings(1, 1, findings)
     calls = [
         call(
@@ -253,7 +290,19 @@ def test_write_scan(info_log):
         rule_pack=rule_pack,
     )
     expected_call = f"Running {expected_result.scan_type} scan on repository {repository.repository_url}"
-    result = STDOUTWriter(toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1).write_scan(
+
+    rule_tag_provider = RuleTagProvider()
+    rule_tag_provider.load("toml_path")
+
+    rule_comment_provider = RuleCommentProvider()
+    rule_comment_provider.load("toml_path")
+
+    result = STDOUTWriter(
+        exit_code_warn=2,
+        exit_code_block=1,
+        rule_tag_provider=rule_tag_provider,
+        rule_comment_provider=rule_comment_provider,
+    ).write_scan(
         expected_result.scan_type,
         expected_result.last_scanned_commit,
         expected_result.timestamp,
@@ -276,8 +325,16 @@ def test_get_last_scanned_commit():
         repository_url="http://repository.url",
         vcs_instance=1,
     )
+    rule_tag_provider = RuleTagProvider()
+    rule_tag_provider.load("toml_path")
+
+    rule_comment_provider = RuleCommentProvider()
+    rule_comment_provider.load("toml_path")
 
     result = STDOUTWriter(
-        toml_rule_file_path="toml_path", exit_code_warn=2, exit_code_block=1
+        exit_code_warn=2,
+        exit_code_block=1,
+        rule_tag_provider=rule_tag_provider,
+        rule_comment_provider=rule_comment_provider,
     ).get_last_scan_for_repository(repository)
     assert result is None

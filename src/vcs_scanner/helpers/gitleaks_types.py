@@ -1,10 +1,12 @@
 from typing import Required, TypedDict
 
+
 # Move me to Backend later
 class Allowlist(TypedDict, total=False):
     description: Required[str]
     paths: list[str]
     regexes: list[str]
+
 
 class RulesAllowlist(TypedDict, total=False):
     description: Required[str]
@@ -12,6 +14,7 @@ class RulesAllowlist(TypedDict, total=False):
     regexes: list[str]
     paths: list[str]
     stopwords: list[str]
+
 
 class RuleToml(TypedDict, total=False):
     # from GitLeeks
@@ -27,7 +30,8 @@ class RuleToml(TypedDict, total=False):
     tags: Required[list[str]]
     comment: str
 
-class GitLeaksConfigToml(TypedDict): # Implicit total = True
+
+class GitLeaksConfigToml(TypedDict):  # Implicit total = True
     title: str
     version: str
     allowlist: Allowlist

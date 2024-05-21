@@ -18,6 +18,7 @@ from vcs_scanner.output_modules.output_module import OutputModule
 from vcs_scanner.resc_worker import RESCWorker
 from vcs_scanner.secret_scanners.git_operation import clone_repository
 from vcs_scanner.secret_scanners.gitleaks_wrapper import GitLeaksWrapper
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 # This is an arbitrary number to distinguish between no issues, an error and
 # the situation in which leaks are found. Note that this number cannot be bigger than 255 (OS limitation)
@@ -42,6 +43,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         force_base_scan: bool = False,
         latest_commit: str = None,
     ):
+        self.rule_provider: RuleFileProvider | None = None
         self.gitleaks_rules_path: str = gitleaks_rules_path
         self.gitleaks_binary_path: str = gitleaks_binary_path
         self.rule_pack_version: str = rule_pack_version
@@ -68,7 +70,18 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         )
         return repo_clone_path
 
-    def run_repository_scan(self) -> None:
+    def run_scan(self, as_dir: bool = False, as_repo: bool = False) -> None:
+        if not as_dir and not as_repo:
+            logger.error("no scan type selected")
+            return
+
+        if as_repo:
+            self._run_repository_scan()
+
+        if as_dir:
+            self._run_directory_scan()
+
+    def _run_repository_scan(self) -> None:
         if not self.latest_commit:
             # There is no latest commit for this repository, assuming that its empty
             logger.info(
@@ -149,7 +162,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 f"{self.repository.project_key}/{self.repository.repository_name} no new commits found."
             )
 
-    def run_directory_scan(self) -> None:
+    def _run_directory_scan(self) -> None:
         """
         Scan the given non-git directory, set in the self.local_path variable
         """

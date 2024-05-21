@@ -14,11 +14,15 @@ from vcs_scanner.model import VCSInstanceRuntime
 
 class OutputModule(metaclass=abc.ABCMeta):
     @abc.abstractmethod
+    def load_rules(self, toml_rule_file_path: str) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def write_repository(self, repository: Repository):
+    def write_repository(self, repository: Repository) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -27,7 +31,7 @@ class OutputModule(metaclass=abc.ABCMeta):
         scan_id: int,
         repository_id: int,
         scan_findings: list[FindingCreate],
-    ):
+    ) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

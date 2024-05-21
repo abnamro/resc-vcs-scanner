@@ -36,9 +36,10 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file
-from vcs_scanner.helpers.finding_filter import get_rule_tags, should_process_finding
+from vcs_scanner.helpers.finding_filter import should_process_finding
 from vcs_scanner.model import VCSInstanceRuntime
 from vcs_scanner.output_modules.output_module import OutputModule
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +48,17 @@ class RESTAPIWriter(OutputModule):
     def __init__(
         self,
         rws_url,
-        toml_rule_file_path: str = None,
         ignore_tags: list[str] = None,
         include_tags: list[str] = None,
+        rule_tag_provider: RuleTagProvider = RuleTagProvider(),
     ):
         self.rws_url = rws_url
-        self.toml_rule_file_path = toml_rule_file_path
         self.ignore_tags = ignore_tags
         self.include_tags = include_tags
+        self.rule_tag_provider: RuleTagProvider = rule_tag_provider
+
+    def load_rules(self, toml_rule_file_path: str) -> None:
+        self.rule_tag_provider.load(toml_rule_file_path)
 
     def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         created_vcs_instance = None
@@ -91,7 +95,7 @@ class RESTAPIWriter(OutputModule):
         scan_findings: list[FindingBase],
     ) -> None:
         findings_create = []
-        rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
+        rule_tags = self.rule_tag_provider.get_rule_tags()
         for finding in scan_findings:
             new_finding = FindingCreate.create_from_base_class(base_object=finding, repository_id=repository_id)
 

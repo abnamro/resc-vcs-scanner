@@ -17,6 +17,7 @@ from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 
 
 # A test method to check the happy flow of the write_repository method.

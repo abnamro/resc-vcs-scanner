@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class IgnoredListProvider:  # pylint: disable=R0902
-    def __init__(self, ignore_findings_path: str):
-        self.ignore_findings_path: str = ignore_findings_path
+    def __init__(self, ignore_findings_path: str | None):
+        self.ignore_findings_path: str | None = ignore_findings_path
         self.today: datetime = datetime.now(UTC)
 
     def get_ignore_list(self) -> dict[str, True]:

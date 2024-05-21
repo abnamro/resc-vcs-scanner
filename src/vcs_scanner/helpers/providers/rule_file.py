@@ -6,7 +6,8 @@ from vcs_scanner.helpers.gitleaks_types import GitLeaksConfigToml, RuleToml
 
 logger = logging.getLogger(__name__)
 
-class RuleFileProvider:  # pylint: disable=R0902
+
+class RuleFileProvider:
     def __init__(self, toml_rule_file_path: str):
         self.base_rule_file_path: str = toml_rule_file_path
         self.scan_as_repo_rule_file_path: str | None = None
@@ -17,7 +18,7 @@ class RuleFileProvider:  # pylint: disable=R0902
             return None
 
         toml_dict: GitLeaksConfigToml = {}
-        rules_as_repo: list[RuleToml]  = []
+        rules_as_repo: list[RuleToml] = []
         rules_as_dir: list[RuleToml] = []
 
         # read toml
@@ -34,7 +35,6 @@ class RuleFileProvider:  # pylint: disable=R0902
         if len(rules_as_dir) > 0:
             if self._create_rule_file(toml_dict, rules_as_dir, destination_rule_as_dir):
                 self.scan_as_dir_rule_file_path = destination_rule_as_dir
-
 
     def _create_rule_file(self, toml_dict: GitLeaksConfigToml, rules: list[RuleToml], destination: str) -> bool:
         """
@@ -57,10 +57,10 @@ class RuleFileProvider:  # pylint: disable=R0902
         }
 
         try:
-            with open(destination, 'w') as f:
+            with open(destination, "w") as f:
                 tomlkit.dump(new_toml_dict, f)
-        except :  # <- File does not exists: we just fail silently
+        except:  # <- File does not exists: we just fail silently
             logger.error(f"could not write in {destination}")
             return False
-        
+
         return True

@@ -31,39 +31,3 @@ def should_process_finding(
         return False
 
     return True
-
-
-def get_rule_tags(toml_rule_file_path: str) -> dict[str, list[str]]:
-    """
-        Get the tags per rule from the .toml rule file, from self.toml_rule_file_path
-    :return: dict.
-        The output will contain a dictionary with the rule id as the key and the tags as a list in the value
-    """
-    rule_tags = {}
-    # read toml
-    with open(toml_rule_file_path, encoding="utf-8") as toml_rule_file:
-        toml_rule_dictionary = tomlkit.loads(toml_rule_file.read())
-        # convert to dict
-        for toml_rule in toml_rule_dictionary["rules"]:
-            rule_id = toml_rule.get("id", None)
-            if rule_id:
-                rule_tags[rule_id] = toml_rule.get("tags", [])
-    return rule_tags
-
-
-def get_rule_comment(toml_rule_file_path: str) -> dict[str, str]:
-    """
-        Get the comment per rule from the .toml rule file, from self.toml_rule_file_path
-    :return: dict.
-        The output will contain a dictionary with the rule id as the key and the comment as a string in the value
-    """
-    rule_comments = {}
-    # read toml
-    with open(toml_rule_file_path, encoding="utf-8") as toml_rule_file:
-        toml_rule_dictionary = tomlkit.loads(toml_rule_file.read())
-        # convert to dict
-        for toml_rule in toml_rule_dictionary["rules"]:
-            rule_id = toml_rule.get("id", None)
-            if rule_id:
-                rule_comments[rule_id] = toml_rule.get("comment", "")
-    return rule_comments
