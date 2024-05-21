@@ -73,16 +73,19 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         else:
             self.repo_display_name = self.repository.repository_url
 
-    def _is_valid(self, as_dir: bool = False, as_repo: bool = False) -> bool:
-        if not as_dir and not as_repo:
-            logger.error("no scan type selected")
-            return False
-        return True
-
     def run_scan(self, as_dir: bool = False, as_repo: bool = False) -> None:
+        """
+        Run the scan steps by steps.
+
+        Args:
+            as_dir (bool, optional): whether we scan as directory. Defaults to False.
+            as_repo (bool, optional): whether we scan as repository. Defaults to False.
+        """
+
         if not self._is_valid(as_dir, as_repo):
             return
-        if not self._is_scan_needed():
+
+        if not self._is_scan_needed_from_latest_commit():
             return
         if self._create_repository():
             return  # Insert in to repository table (if necessary)
@@ -105,7 +108,17 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             return  # No findings found.
         self._write_findings()
 
-    def _is_scan_needed(self) -> bool:
+
+
+    def _is_valid(self, as_dir: bool = False, as_repo: bool = False) -> bool:
+        if not as_dir and not as_repo:
+            logger.error("no scan type selected")
+            return False
+        return True
+
+
+
+    def _is_scan_needed_from_latest_commit(self) -> bool:
         if not self.latest_commit:
             # There is no latest commit for this repository, assuming that its empty
             logger.info(
