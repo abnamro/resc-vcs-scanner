@@ -11,6 +11,7 @@ from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 sys.path.insert(0, "src")
 
@@ -43,9 +44,10 @@ def test_clone_repo(clone_from):
         repository_url="https://repository.url",
         vcs_instance=1,
     )
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="0.0.1",
         output_plugin=RESTAPIWriter(rws_url=rws_url),
         repository=repository,
@@ -77,9 +79,10 @@ def test_scan_repo(start_scan):
         repository_url="https://repository.url",
         vcs_instance=1,
     )
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="0.0.1",
         output_plugin=RESTAPIWriter(rws_url=rws_url),
         repository=repository,
@@ -103,9 +106,10 @@ def test_scan_directory(start_scan):
         repository_url="https://repository.url",
         vcs_instance=1,
     )
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="0.0.1",
         output_plugin=RESTAPIWriter(rws_url=rws_url),
         repository=repository,
@@ -127,10 +131,10 @@ def initialize_and_get_repo_scanner():
         repository_url="https://repository.url",
         vcs_instance=1,
     )
-
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="2.0.1",
         output_plugin=RESTAPIWriter(rws_url="https://fakeurl.com:8000"),
         repository=repository,

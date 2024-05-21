@@ -22,6 +22,7 @@ from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 logger_config = initialise_logs(LOG_FILE_PATH_CLI)
 logger = logging.getLogger(__name__)
@@ -139,9 +140,11 @@ def scan_directory(args: Namespace):
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
+    gitleaks_rules_provider = RuleFileProvider(args.gitleaks_rules_path, init=True)
+
     secret_scanner = SecretScanner(
         gitleaks_binary_path=args.gitleaks_path,
-        gitleaks_rules_path=args.gitleaks_rules_path,
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version=rule_pack_version,
         output_plugin=output_plugin,
         repository=repository.convert_to_repository(vcs_instance_id=1),
@@ -182,9 +185,11 @@ def scan_repository(args: Namespace):
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
+    gitleaks_rules_provider = RuleFileProvider(args.gitleaks_rules_path, init=True)
+
     secret_scanner = SecretScanner(
         gitleaks_binary_path=args.gitleaks_path,
-        gitleaks_rules_path=args.gitleaks_rules_path,
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version=rule_pack_version,
         output_plugin=output_plugin,
         repository=repository.convert_to_repository(vcs_instance_id=1),

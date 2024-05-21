@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 
 
 class RuleFileProvider:
-    def __init__(self, toml_rule_file_path: str):
+    def __init__(self, toml_rule_file_path: str, init: bool = False):
         self.base_rule_file_path: str = toml_rule_file_path
-        self.scan_as_repo_rule_file_path: str | None = None
-        self.scan_as_dir_rule_file_path: str | None = None
+        self.scan_as_repo_rule_file_path: str | None = toml_rule_file_path if init else None
+        self.scan_as_dir_rule_file_path: str | None = toml_rule_file_path if init else None
 
     def init(self, destination_rule_as_repo: str, destination_rule_as_dir: str) -> None:
         if destination_rule_as_repo == self.base_rule_file_path and destination_rule_as_dir == self.base_rule_file_path:

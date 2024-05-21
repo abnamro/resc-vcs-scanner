@@ -32,7 +32,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
     def __init__(
         self,
         gitleaks_binary_path: str,
-        gitleaks_rules_path: str,
+        gitleaks_rules_provider: RuleFileProvider,
         rule_pack_version: str,
         output_plugin: OutputModule,
         repository: Repository,
@@ -44,7 +44,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         latest_commit: str = None,
     ):
         self.rule_provider: RuleFileProvider | None = None
-        self.gitleaks_rules_path: str = gitleaks_rules_path
+        self.gitleaks_rules_provider: RuleFileProvider = gitleaks_rules_provider
         self.gitleaks_binary_path: str = gitleaks_binary_path
         self.rule_pack_version: str = rule_pack_version
         self._output_module: OutputModule = output_plugin
@@ -204,7 +204,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 scan_from=scan_from,
                 gitleaks_path=self.gitleaks_binary_path,
                 repository_path=repo_clone_path,
-                rules_filepath=self.gitleaks_rules_path,
+                rules_filepath=self.gitleaks_rules_provider.scan_as_repo_rule_file_path,
                 report_filepath=report_filepath,
             )
 
@@ -246,7 +246,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 scan_from=None,
                 gitleaks_path=self.gitleaks_binary_path,
                 repository_path=directory_path,
-                rules_filepath=self.gitleaks_rules_path,
+                rules_filepath=self.gitleaks_rules_provider.scan_as_dir_rule_file_path,
                 report_filepath=report_filepath,
                 git_scan=False,
             )

@@ -16,6 +16,7 @@ from vcs_scanner.helpers.environment_wrapper import validate_environment
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.secret_scanners.configuration import (
     GITLEAKS_PATH,
     RABBITMQ_DEFAULT_VHOST,
@@ -100,9 +101,11 @@ def scan_repository(repository):
             rws_url=rws_url, include_tags=include_tags, ignore_tags=ignore_tags, rule_tag_provider=rule_tag_provider
         )
 
+        gitleaks_rules_provider = RuleFileProvider(TEMP_RULE_FILE, init=True)
+
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
-            gitleaks_rules_path=TEMP_RULE_FILE,
+            gitleaks_rules_provider=gitleaks_rules_provider,
             rule_pack_version=active_rule_pack_version,
             output_plugin=rest_api_writer,
             repository=repository,
