@@ -147,21 +147,20 @@ def initialize_and_get_repo_scanner():
 
 def test_scan_type_is_not_set():
     secret_scanner = initialize_and_get_repo_scanner()
-    secret_scanner.run_scan(False,False)
-    assert False == secret_scanner._is_valid()
+    secret_scanner.run_scan(False, False)
+    assert not secret_scanner._is_valid()
 
 
 def test_is_scan_needed_from_latest_commit_when_no_latest_and_repo():
     secret_scanner = initialize_and_get_repo_scanner()
     secret_scanner._as_repo = True
-    assert False == secret_scanner._is_scan_needed_from_latest_commit()
+    assert not secret_scanner._is_scan_needed_from_latest_commit()
+
 
 def test_is_scan_needed_from_latest_commit_when_no_latest_and_dir():
     secret_scanner = initialize_and_get_repo_scanner()
-    secret_scanner._as_repo = False
     secret_scanner._as_dir = True
-    assert True == secret_scanner._is_scan_needed_from_latest_commit()
- 
+    assert secret_scanner._is_scan_needed_from_latest_commit()
 
 
 def test_scan_type_is_base_when_a_latest_scan_is_not_present():

@@ -6,7 +6,7 @@ import shutil
 import time
 import uuid
 from datetime import datetime, UTC
-from typing import Callable
+from collections.abc import Callable
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase
@@ -59,8 +59,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self.force_base_scan = force_base_scan
         self.latest_commit = latest_commit
 
-        self._as_dir: bool = False,
-        self._as_repo: bool = False,
+        self._as_dir: bool = False
+        self._as_repo: bool = False
         self._created_repository: None | RepositoryBase = None
         self._last_scanned_commit: None | str = None
         self._scan_type_to_run: None | ScanType = None
@@ -87,7 +87,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self._as_dir = as_dir
         self._as_repo = as_repo
 
-        pipes: list[Callable[[],bool]] = [
+        pipes: list[Callable[[], bool]] = [
             self._is_valid,
             self._is_scan_needed_from_latest_commit,
             self._create_repository,
@@ -107,14 +107,11 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             if not pipe():
                 return
 
-
     def _is_valid(self) -> bool:
         if not self._as_dir and not self._as_repo:
             logger.error("no scan type selected")
             return False
         return True
-
-
 
     def _is_scan_needed_from_latest_commit(self) -> bool:
         if self._as_repo and not self.latest_commit:
@@ -177,7 +174,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             )
             return False
         return True
-    
+
     def _start_timer(self) -> True:
         self._scan_timestamp_start = datetime.now(UTC)
         return True
