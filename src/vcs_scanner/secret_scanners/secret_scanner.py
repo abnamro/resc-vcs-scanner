@@ -137,7 +137,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             else:
                 repo_clone_path = self.local_path
 
-            findings = self.scan_repo(scan_type_to_run, last_scanned_commit, repo_clone_path)
+            findings = self._scan_repo(scan_type_to_run, last_scanned_commit, repo_clone_path)
             scan_timestamp_end = datetime.now(UTC)
             logger.info(
                 f"Running {scan_type_to_run} scan on repository "
@@ -169,7 +169,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         logger.info(f"Started task for scanning {self.local_path} using rule pack version: {self.rule_pack_version}")
 
         scan_timestamp_start = datetime.now(UTC)
-        findings = self.scan_directory(self.local_path)
+        findings = self._scan_directory(self.local_path)
         scan_timestamp_end = datetime.now(UTC)
         logger.info(f"Running local scan on {self.local_path} took {scan_timestamp_end - scan_timestamp_start} ms.")
 
@@ -179,7 +179,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         else:
             logger.info(f"No findings registered in {self.local_path}.")
 
-    def scan_repo(
+    def _scan_repo(
         self, scan_type_to_run: str, last_scanned_commit: str, repo_clone_path: str
     ) -> list[FindingBase] | None:
         """
@@ -236,7 +236,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 shutil.rmtree(repo_clone_path)
         return None
 
-    def scan_directory(self, directory_path: str) -> list[FindingBase] | None:
+    def _scan_directory(self, directory_path: str) -> list[FindingBase] | None:
         """
             Scan the given directory
         :param directory_path:

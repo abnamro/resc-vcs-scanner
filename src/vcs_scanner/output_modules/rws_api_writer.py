@@ -5,6 +5,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+from argparse import Namespace
 
 # Third Party
 from resc_backend.constants import TEMP_RULE_FILE
@@ -234,3 +235,22 @@ class RESTAPIWriter(OutputModule):
         else:
             rule_pack_version = self.download_rule_pack()
         return rule_pack_version
+
+    @staticmethod
+    def make(args: Namespace) -> "RESTAPIWriter":
+        """
+            Get the Rest API writer given the args provided.
+
+        :param args:
+            Namespace object containing the CLI arguments
+        """
+        rule_tag_provider = RuleTagProvider()
+        rule_tag_provider.load(args.gitleaks_rules_path)
+
+        output_plugin = RESTAPIWriter(
+            rws_url=args.rws_url,
+            include_tags=args.include_tags,
+            ignore_tags=args.ignore_tags,
+            rule_tag_provider=rule_tag_provider,
+        )
+        return output_plugin

@@ -2,6 +2,7 @@
 import logging
 import sys
 from datetime import datetime, UTC
+from argparse import Namespace
 
 # Third Party
 from prettytable import PrettyTable
@@ -255,3 +256,32 @@ class STDOUTWriter(OutputModule):
 
     def get_last_scan_for_repository(self, repository: Repository) -> ScanRead:
         return None
+
+    @staticmethod
+    def make(args: Namespace) -> "STDOUTWriter":
+        """
+            Get the STDOUT writer given the args provided.
+
+        :param args:
+            Namespace object containing the CLI arguments
+        """
+        rule_tag_provider = RuleTagProvider()
+        rule_tag_provider.load(args.gitleaks_rules_path)
+
+        rule_comment_provider = RuleCommentProvider()
+        rule_comment_provider.load(args.gitleaks_rules_path)
+
+        ignored_finding_provider = IgnoredListProvider(args.ignored_blocker_path)
+
+        output_plugin = STDOUTWriter(
+            exit_code_warn=args.exit_code_warn,
+            exit_code_block=args.exit_code_block,
+            include_tags=args.include_tags,
+            ignore_tags=args.ignore_tags,
+            working_dir=args.dir,
+            ignore_findings_providers=ignored_finding_provider,
+            rule_tag_provider=rule_tag_provider,
+            rule_comment_provider=rule_comment_provider,
+        )
+
+        return output_plugin

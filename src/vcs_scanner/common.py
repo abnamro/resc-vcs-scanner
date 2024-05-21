@@ -98,5 +98,5 @@ def load_vcs_instances(file_path: str) -> dict[str, VCSInstanceRuntime]:
 
 def get_rule_pack_version_from_file(file_content: str) -> str | None:
     toml_rule_dictionary = tomlkit.loads(file_content)
-    rule_pack_version = toml_rule_dictionary["version"] if "version" in toml_rule_dictionary else None
+    rule_pack_version = toml_rule_dictionary.get("version", None)
     return rule_pack_version

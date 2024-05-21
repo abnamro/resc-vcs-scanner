@@ -19,9 +19,6 @@ from vcs_scanner.constants import (
 )
 from src.vcs_scanner.helpers.cli import create_cli_argparser
 from vcs_scanner.model import RepositoryRuntime
-from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
-from vcs_scanner.helpers.providers.rule_comment import RuleCommentProvider
-from vcs_scanner.helpers.providers.ignore_list import IgnoredListProvider
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
@@ -135,26 +132,9 @@ def scan_directory(args: Namespace):
         latest_commit=FAKE_COMMIT,
     )
 
-    rule_tag_provider = RuleTagProvider()
-    rule_tag_provider.load(args.gitleaks_rules_path)
+    output_plugin = STDOUTWriter.make(args)
+    rule_pack_version = _get_rule_pack_version(args)
 
-    rule_comment_provider = RuleCommentProvider()
-    rule_comment_provider.load(args.gitleaks_rules_path)
-
-    ignored_finding_provider = IgnoredListProvider(args.ignored_blocker_path)
-
-    output_plugin = STDOUTWriter(
-        exit_code_warn=args.exit_code_warn,
-        exit_code_block=args.exit_code_block,
-        include_tags=args.include_tags,
-        ignore_tags=args.ignore_tags,
-        working_dir=args.dir,
-        ignore_findings_providers=ignored_finding_provider,
-        rule_tag_provider=rule_tag_provider,
-        rule_comment_provider=rule_comment_provider,
-    )
-    with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
-        rule_pack_version = get_rule_pack_version_from_file(rule_pack.read())
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
@@ -191,26 +171,13 @@ def scan_repository(args: Namespace):
     )
 
     if args.rws_url:
-        output_plugin = RESTAPIWriter(
-            rws_url=args.rws_url,
-            toml_rule_file_path=args.gitleaks_rules_path,
-            include_tags=args.include_tags,
-            ignore_tags=args.ignore_tags,
-        )
+        output_plugin = RESTAPIWriter.make(args)
         rule_pack_version = output_plugin.download_rule_pack()
 
     else:
-        output_plugin = STDOUTWriter(
-            toml_rule_file_path=args.gitleaks_rules_path,
-            exit_code_warn=args.exit_code_warn,
-            exit_code_block=args.exit_code_block,
-            include_tags=args.include_tags,
-            ignore_tags=args.ignore_tags,
-            working_dir=args.dir,
-            ignore_findings_path=args.ignored_blocker_path,
-        )
-        with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
-            rule_pack_version = get_rule_pack_version_from_file(rule_pack.read())
+        output_plugin = STDOUTWriter.make(args)
+        rule_pack_version = _get_rule_pack_version(args)
+
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
@@ -264,3 +231,8 @@ def determine_vcs_name(repo_url: str, vcs_type: VCSProviders) -> str:
         elif vcs_type == VCSProviders.BITBUCKET:
             vcs_name = CLI_VCS_BITBUCKET
     return vcs_name
+
+
+def _get_rule_pack_version(args: Namespace) -> str | None:
+    with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
+        return get_rule_pack_version_from_file(rule_pack.read())

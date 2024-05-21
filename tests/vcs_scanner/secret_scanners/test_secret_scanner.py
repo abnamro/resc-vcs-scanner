@@ -87,7 +87,7 @@ def test_scan_repo(start_scan):
         personal_access_token=personal_access_token,
     )
     repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    result = secret_scanner.scan_repo(ScanType.BASE, None, repo_clone_path)
+    result = secret_scanner._scan_repo(ScanType.BASE, None, repo_clone_path)
     assert result is None
     start_scan.assert_called_once()
 
@@ -113,7 +113,7 @@ def test_scan_directory(start_scan):
         personal_access_token="",
     )
     repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    result = secret_scanner.scan_directory(directory_path=repo_clone_path)
+    result = secret_scanner._scan_directory(directory_path=repo_clone_path)
     assert result is None
     start_scan.assert_called_once()
 
