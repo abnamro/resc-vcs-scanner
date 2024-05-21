@@ -119,7 +119,7 @@ def scan_repository(repository):
             latest_commit=repository_runtime.latest_commit,
         )
 
-        secret_scanner.run_scan(as_dir=False, as_repo=True)
+        secret_scanner.run_scan(as_dir=True, as_repo=True)
     except KeyError:
         logger.error(
             f"No configuration found for vcs instance {repository_runtime.vcs_instance_name}, "
