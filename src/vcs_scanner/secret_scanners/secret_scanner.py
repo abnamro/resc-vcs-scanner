@@ -362,8 +362,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
     def _write_findings(self) -> True:
         logger.info(f"Scan completed: {len(self._findings)} findings were found.")
         self._output_module.write_findings(
-            repository_id=self._created_repository.id_,
-            scan_id=self._created_scan.id_,
+            repository_id=getattr(self._created_repository, "id_", 0),
+            scan_id=getattr(self._created_scan, "id_", 0),
             scan_findings=self._findings,
         )
         return True
