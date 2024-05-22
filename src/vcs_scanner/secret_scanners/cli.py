@@ -17,7 +17,7 @@ from vcs_scanner.constants import (
     CLI_VCS_LOCAL_SCAN,
     LOG_FILE_PATH_CLI,
 )
-from src.vcs_scanner.helpers.cli import create_cli_argparser
+from vcs_scanner.helpers.cli import create_cli_argparser
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
