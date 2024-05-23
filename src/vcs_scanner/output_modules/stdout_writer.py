@@ -160,6 +160,7 @@ class STDOUTWriter(OutputModule):
         rule_tags = self.rule_tag_provider.get_rule_tags()
         ignore_dictionary = self.ignore_findings_providers.get_ignore_list()
         for finding in scan_findings:
+            logger.debug(finding.commit_id)
             should_process = should_process_finding(
                 finding=finding,
                 rule_tags=rule_tags,

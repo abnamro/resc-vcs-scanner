@@ -21,6 +21,7 @@ from vcs_scanner.helpers.cli import create_cli_argparser
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
+from vcs_scanner.secret_scanners.git_operation import read_repo_from_local
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
@@ -110,12 +111,19 @@ def scan_repository_from_cli():
     elif args.command == "repo":
         if args.repository_location == "local":
             logger.info(f"Scanning repository local {args.dir.absolute()}")
-            args.repo_url = FAKE_URL
+            args.repo_url = fetch_url_from_dot_git_config(args.dir.absolute())
             args.username = None
             args.password = None
         elif args.repository_location == "remote":
             logger.info(f"Scanning repository remote {args.repo_url}")
         scan_repository(args)
+
+
+def fetch_url_from_dot_git_config(path: str):
+    if not os.path.exists(path / ".git/config"):
+        return FAKE_URL
+
+    return read_repo_from_local(path)
 
 
 # TODO refactor and merge scan_directory / scan_repository to avoid code duplication.

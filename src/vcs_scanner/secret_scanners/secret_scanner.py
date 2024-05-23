@@ -231,9 +231,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         )
         return True
 
-    def _scan_repo(
-        self, scan_type_to_run: str, last_scanned_commit: str, repo_clone_path: str
-    ) -> list[FindingBase] | None:
+    def _scan_repo(self, scan_type_to_run: str, last_scanned_commit: str, repo_clone_path: str) -> list[FindingBase]:
         """
             Clone and scan the given repository
         :param repo_clone_path:
@@ -269,7 +267,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             )
 
             before_scan = time.time()
-            findings: list[FindingBase] | None = gitleaks_command.start_scan()
+            findings: list[FindingBase] = gitleaks_command.start_scan()
             after_scan = time.time()
             scan_duration = int(after_scan - before_scan)
             logger.info(f"scan of repository {repo_clone_path} took {scan_duration} seconds")
@@ -278,6 +276,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             logger.error(
                 f"An exception occurred while scanning repository {self.repository.repository_url} " f"error: {error}"
             )
+            return []
         finally:
             # Make sure the tempfile and repo cloned path removed
             logger.debug(f"Cleaning up the temporary report: {report_filepath}")
@@ -286,7 +285,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             if repo_clone_path and not self.local_path and os.path.exists(repo_clone_path):
                 logger.debug(f"Cleaning up the repository cloned directory: {repo_clone_path}")
                 shutil.rmtree(repo_clone_path)
-        return None
+        return []
 
     def _run_dir_scan(self):
         if not self._as_dir:

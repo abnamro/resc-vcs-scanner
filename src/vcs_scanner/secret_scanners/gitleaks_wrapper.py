@@ -72,16 +72,16 @@ class GitLeaksWrapper:
 
             error_output = result.stderr.decode("utf-8")
             logger.error(f"GitLeaks exited with an unexpected code: {exitcode}. Output: {error_output}")
-            return None
+            return []
 
         except subprocess.CalledProcessError as called_process_error:
             logger.error(
                 f"Error encountered while running the gitleaks process: {called_process_error.stdout.decode('utf-8')}"
             )
-            return None
+            return []
         except FileNotFoundError as error:
             logger.error(f"Unable to locate a file: {error}")
-            return None
+            return []
 
     @staticmethod
     def _calculate_permanent_leak_url(leak_url: str, repository: str, commit_id: str) -> str:
@@ -108,11 +108,17 @@ class GitLeaksWrapper:
         return new_url
 
     @staticmethod
-    def _is_valid_timestamp(timestamp: str) -> datetime | None:
+    def _get_valid_timestamp(timestamp: str) -> datetime:
+        if timestamp == "":
+            logger.debug("Date is empty, using now(UTC) instead.")
+            return datetime.now(UTC)
+
         try:
-            converted_timestamp: datetime | None = datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S%z")
+            converted_timestamp: datetime | None = datetime.fromisoformat(timestamp)
         except ValueError:
-            converted_timestamp = None
+            logger.debug(f"{timestamp} has an unexpected date format. Expected ISO 8601")
+            converted_timestamp = datetime.now(UTC)
+
         return converted_timestamp
 
     @classmethod
@@ -127,10 +133,7 @@ class GitLeaksWrapper:
             results = json.load(report_file)
 
         for result in results:
-            commit_timestamp = cls._is_valid_timestamp(result["Date"])
-            if not commit_timestamp:
-                logger.debug(f"{result['Date']} has an unexpected date format. Expected ISO 8601")
-                commit_timestamp = datetime.now(UTC)
+            commit_timestamp = cls._get_valid_timestamp(result["Date"])
             finding = FindingBase(
                 file_path=result["File"],
                 line_number=result["StartLine"],
@@ -143,6 +146,7 @@ class GitLeaksWrapper:
                 commit_timestamp=commit_timestamp,
                 rule_name=result["RuleID"],
             )
+            logger.debug(finding)
 
             findings.append(finding)
 
