@@ -51,7 +51,7 @@ class GitLeaksWrapper:
             command.append(f"--log-opts={self.scan_from}..")
         return command
 
-    def start_scan(self) -> list[FindingBase] | None:
+    def start_scan(self) -> list[FindingBase]:
         """
         :return: Output.
             If Successful, a list of FindingCreate objects is returned.

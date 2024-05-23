@@ -331,7 +331,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             )
 
             before_scan = time.time()
-            findings: list[FindingBase] | None = gitleaks_command.start_scan()
+            findings: list[FindingBase] = gitleaks_command.start_scan()
             after_scan = time.time()
             scan_duration = int(after_scan - before_scan)
             logger.info(f"scan of repository {directory_path} took {scan_duration} seconds")
@@ -356,7 +356,13 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             return False
 
         self._findings = self._findings_from_repo + self._findings_from_dir
+        self._findings = list(map(self._populate_if_empty, self._findings))
         return True
+
+    def _populate_if_empty(self, finding: FindingBase) -> FindingBase:
+        finding.commit_id = finding.commit_id or self.latest_commit
+        finding.author = finding.author or "vcs-scanner"
+        return finding
 
     def _write_findings(self) -> True:
         logger.info(f"Scan completed: {len(self._findings)} findings were found.")
