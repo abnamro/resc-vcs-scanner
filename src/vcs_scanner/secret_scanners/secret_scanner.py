@@ -42,9 +42,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         username: str,
         personal_access_token: str,
         scan_tmp_directory: str = ".",
-        local_path: str = None,
+        local_path: str | None = None,
         force_base_scan: bool = False,
-        latest_commit: str = None,
+        latest_commit: str | None = None,
     ):
         self.rule_provider: RuleFileProvider | None = None
         self.gitleaks_rules_provider: RuleFileProvider = gitleaks_rules_provider
@@ -147,12 +147,11 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         last_scan_for_repository = self._output_module.get_last_scan_for_repository(repository=self._created_repository)
         self._last_scanned_commit = last_scan_for_repository.last_scanned_commit if last_scan_for_repository else None
         self._scan_type_to_run = self._determine_scan_type(
-            latest_commit=self.latest_commit,
             last_scan_for_repository=last_scan_for_repository,
         )
         return True
 
-    def _determine_scan_type(self, last_scan_for_repository: Scan, latest_commit: str = None) -> ScanType | None:
+    def _determine_scan_type(self, last_scan_for_repository: Scan) -> ScanType | None:
         # Force base scan, or has no previous scan
         if self.force_base_scan or last_scan_for_repository is None:
             return ScanType.BASE
@@ -162,7 +161,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             if last_scan_for_repository.rule_pack != self.rule_pack_version:
                 return ScanType.BASE
             # Last commit is different from previous scan
-            if latest_commit and latest_commit != last_scan_for_repository.last_scanned_commit:
+            if self.latest_commit and self.latest_commit != last_scan_for_repository.last_scanned_commit:
                 return ScanType.INCREMENTAL
         # Skip scanning, no conditions match
         return None
@@ -353,7 +352,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return True
 
     def _populate_if_empty(self, finding: FindingBase) -> FindingBase:
-        finding.commit_id = finding.commit_id or self.latest_commit
+        finding.commit_id = finding.commit_id or self.latest_commit or ""
         finding.author = finding.author or "vcs-scanner"
         return finding
 
