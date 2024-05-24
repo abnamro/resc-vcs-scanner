@@ -1,6 +1,6 @@
 celery==5.3.1
 amqp==5.1.1
-requests==2.31.0
+requests==2.32.2
 typing==3.7.4.3
 pydantic==1.10.15
 GitPython==3.1.41
