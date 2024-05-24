@@ -94,10 +94,17 @@ class RESTAPIWriter(OutputModule):
         scan_id: int,
         repository_id: int,
         scan_findings: list[FindingBase],
+        repository_name: str = "",
     ) -> None:
         findings_create = []
+
         rule_tags = self.rule_tag_provider.get_rule_tags()
         for finding in scan_findings:
+            # We strip the repository name here because in the case of
+            # scan as dir the path of the finding is prefixed with the repository name
+            if finding.author == "vcs-scanner":
+                finding.file_path = finding.file_path.removeprefix(repository_name + "/")
+
             new_finding = FindingCreate.create_from_base_class(base_object=finding, repository_id=repository_id)
 
             if should_process_finding(

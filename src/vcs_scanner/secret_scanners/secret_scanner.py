@@ -58,6 +58,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self.local_path = local_path
         self.force_base_scan = force_base_scan
         self.latest_commit = latest_commit
+        self.head_commit: None | str = None
 
         self._as_dir: bool = False
         self._as_repo: bool = False
@@ -199,7 +200,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         # Clone and run scan upon the repository
         if not self.local_path:
             self._repo_clone_path = f"{self._scan_tmp_directory}/{self.repository.repository_name}"
-            clone_repository(
+            self.head_commit = clone_repository(
                 repository_url=self.repository.repository_url,
                 repo_clone_path=self._repo_clone_path,
                 username=self.username,
@@ -352,7 +353,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return True
 
     def _populate_if_empty(self, finding: FindingBase) -> FindingBase:
-        finding.commit_id = finding.commit_id or self.latest_commit or ""
+        finding.commit_id = finding.commit_id or self.head_commit or "unknown"
         finding.author = finding.author or "vcs-scanner"
         return finding
 
@@ -362,6 +363,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             repository_id=getattr(self._created_repository, "id_", 0),
             scan_id=getattr(self._created_scan, "id_", 0),
             scan_findings=self._findings,
+            repository_name=self.repository.repository_name,
         )
         return True
 

@@ -129,7 +129,9 @@ class STDOUTWriter(OutputModule):
 
         return rule_action
 
-    def write_findings(self, scan_id: int, repository_id: int, scan_findings: list[FindingCreate]):
+    def write_findings(
+        self, scan_id: int, repository_id: int, scan_findings: list[FindingCreate], repository_name: str = ""
+    ):
         """
             Write the findings to the STDOUT in a nice table and set the exit code based on the FindingActions found
         :param scan_id:

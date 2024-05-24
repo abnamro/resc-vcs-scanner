@@ -32,6 +32,7 @@ class OutputModule(metaclass=abc.ABCMeta):
         scan_id: int,
         repository_id: int,
         scan_findings: list[FindingCreate],
+        repository_name: str = "",
     ) -> None:
         raise NotImplementedError
 
