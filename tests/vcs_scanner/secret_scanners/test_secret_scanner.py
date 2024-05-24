@@ -11,6 +11,7 @@ from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 sys.path.insert(0, "src")
 
@@ -43,9 +44,10 @@ def test_clone_repo(clone_from):
         repository_url="https://repository.url",
         vcs_instance=1,
     )
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="0.0.1",
         output_plugin=RESTAPIWriter(rws_url=rws_url),
         repository=repository,
@@ -53,8 +55,8 @@ def test_clone_repo(clone_from):
         personal_access_token=personal_access_token,
     )
 
-    result = secret_scanner.clone_repo()
-    assert result == f"./{repository.repository_name}"
+    secret_scanner._clone_repo()
+    assert secret_scanner._repo_clone_path == f"./{repository.repository_name}"
 
     url = repository.repository_url.replace("https://", "")
     expected_repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
@@ -77,9 +79,10 @@ def test_scan_repo(start_scan):
         repository_url="https://repository.url",
         vcs_instance=1,
     )
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="0.0.1",
         output_plugin=RESTAPIWriter(rws_url=rws_url),
         repository=repository,
@@ -87,7 +90,8 @@ def test_scan_repo(start_scan):
         personal_access_token=personal_access_token,
     )
     repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    result = secret_scanner.scan_repo(ScanType.BASE, None, repo_clone_path)
+    secret_scanner._repo_clone_path = repo_clone_path
+    result = secret_scanner._scan_repo(ScanType.BASE, None)
     assert result is None
     start_scan.assert_called_once()
 
@@ -103,9 +107,10 @@ def test_scan_directory(start_scan):
         repository_url="https://repository.url",
         vcs_instance=1,
     )
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="0.0.1",
         output_plugin=RESTAPIWriter(rws_url=rws_url),
         repository=repository,
@@ -113,7 +118,7 @@ def test_scan_directory(start_scan):
         personal_access_token="",
     )
     repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
-    result = secret_scanner.scan_directory(directory_path=repo_clone_path)
+    result = secret_scanner._scan_directory(directory_path=repo_clone_path)
     assert result is None
     start_scan.assert_called_once()
 
@@ -127,10 +132,10 @@ def initialize_and_get_repo_scanner():
         repository_url="https://repository.url",
         vcs_instance=1,
     )
-
+    gitleaks_rules_provider = RuleFileProvider("/rules.toml", init=True)
     secret_scanner = SecretScanner(
         gitleaks_binary_path="/tmp/gitleaks",
-        gitleaks_rules_path="/rules.toml",
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version="2.0.1",
         output_plugin=RESTAPIWriter(rws_url="https://fakeurl.com:8000"),
         repository=repository,
@@ -141,10 +146,28 @@ def initialize_and_get_repo_scanner():
     return secret_scanner
 
 
+def test_scan_type_is_not_set():
+    secret_scanner = initialize_and_get_repo_scanner()
+    secret_scanner.run_scan(False, False)
+    assert not secret_scanner._is_valid()
+
+
+def test_is_scan_needed_from_latest_commit_when_no_latest_and_repo():
+    secret_scanner = initialize_and_get_repo_scanner()
+    secret_scanner._as_repo = True
+    assert not secret_scanner._is_scan_needed_from_latest_commit()
+
+
+def test_is_scan_needed_from_latest_commit_when_no_latest_and_dir():
+    secret_scanner = initialize_and_get_repo_scanner()
+    secret_scanner._as_dir = True
+    assert secret_scanner._is_scan_needed_from_latest_commit()
+
+
 def test_scan_type_is_base_when_a_latest_scan_is_not_present():
     secret_scanner = initialize_and_get_repo_scanner()
 
-    scan_type = secret_scanner.determine_scan_type(None)
+    scan_type = secret_scanner._determine_scan_type(None)
     assert scan_type == ScanType.BASE
 
 
@@ -161,7 +184,8 @@ def test_scan_type_is_base_when_a_latest_scan_is_present_and_rule_pack_is_latest
         rule_pack="2.0.2",
     )
 
-    scan_type = secret_scanner.determine_scan_type(scan_read, "latest_commit")
+    secret_scanner.latest_commit = "latest_commit"
+    scan_type = secret_scanner._determine_scan_type(scan_read)
     assert scan_type == ScanType.BASE
 
 
@@ -178,7 +202,8 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
         rule_pack=secret_scanner.rule_pack_version,
     )
 
-    scan_type = secret_scanner.determine_scan_type(scan_read, "latest_commit")
+    secret_scanner.latest_commit = "latest_commit"
+    scan_type = secret_scanner._determine_scan_type(scan_read)
     assert scan_type == ScanType.INCREMENTAL
 
 
@@ -195,5 +220,6 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
         rule_pack=secret_scanner.rule_pack_version,
     )
 
-    scan_type = secret_scanner.determine_scan_type(scan_read, "latest_commit")
+    secret_scanner.latest_commit = "latest_commit"
+    scan_type = secret_scanner._determine_scan_type(scan_read)
     assert scan_type == ScanType.INCREMENTAL

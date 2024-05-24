@@ -6,7 +6,7 @@ import os
 # Third Party
 from celery import Celery
 from celery.utils.log import get_task_logger
-from resc_backend.constants import TEMP_RULE_FILE
+from resc_backend.constants import TEMP_RULE_FILE, TEMP_RULE_DIR_FILE, TEMP_RULE_REPO_FILE
 from resc_backend.resc_web_service.schema.repository import Repository
 
 # First Party
@@ -15,6 +15,8 @@ from vcs_scanner.constants import LOG_FILE_PATH
 from vcs_scanner.helpers.environment_wrapper import validate_environment
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.secret_scanners.configuration import (
     GITLEAKS_PATH,
     RABBITMQ_DEFAULT_VHOST,
@@ -92,16 +94,24 @@ def scan_repository(repository):
         # Split the ignore_tags by comma if supplied
         ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
 
+        rule_tag_provider = RuleTagProvider()
+        rule_tag_provider.load(TEMP_RULE_FILE)
+
+        rest_api_writer = RESTAPIWriter(
+            rws_url=rws_url, include_tags=include_tags, ignore_tags=ignore_tags, rule_tag_provider=rule_tag_provider
+        )
+
+        gitleaks_rules_provider = RuleFileProvider(TEMP_RULE_FILE)
+        gitleaks_rules_provider.init(
+            destination_rule_as_repo=TEMP_RULE_REPO_FILE,
+            destination_rule_as_dir=TEMP_RULE_DIR_FILE,
+        )
+
         secret_scanner = SecretScanner(
             gitleaks_binary_path=env_variables[GITLEAKS_PATH],
-            gitleaks_rules_path=TEMP_RULE_FILE,
+            gitleaks_rules_provider=gitleaks_rules_provider,
             rule_pack_version=active_rule_pack_version,
-            output_plugin=RESTAPIWriter(
-                rws_url=rws_url,
-                toml_rule_file_path=TEMP_RULE_FILE,
-                include_tags=include_tags,
-                ignore_tags=ignore_tags,
-            ),
+            output_plugin=rest_api_writer,
             repository=repository,
             username=vcs_instance.username,
             personal_access_token=vcs_instance.token,
@@ -109,7 +119,7 @@ def scan_repository(repository):
             latest_commit=repository_runtime.latest_commit,
         )
 
-        secret_scanner.run_repository_scan()
+        secret_scanner.run_scan(as_dir=True, as_repo=True)
     except KeyError:
         logger.error(
             f"No configuration found for vcs instance {repository_runtime.vcs_instance_name}, "

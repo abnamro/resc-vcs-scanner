@@ -2,6 +2,7 @@
 import logging
 import sys
 from datetime import datetime, UTC
+from argparse import Namespace
 
 # Third Party
 from prettytable import PrettyTable
@@ -14,12 +15,10 @@ from termcolor import colored
 
 # First Party
 from vcs_scanner.helpers.finding_action import FindingAction
-from vcs_scanner.helpers.finding_filter import (
-    get_rule_comment,
-    get_rule_tags,
-    should_process_finding,
-)
-from vcs_scanner.helpers.ignore_list_provider import IgnoredListProvider
+from vcs_scanner.helpers.finding_filter import should_process_finding
+from vcs_scanner.helpers.providers.ignore_list import IgnoredListProvider
+from vcs_scanner.helpers.providers.rule_comment import RuleCommentProvider
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 from vcs_scanner.model import VCSInstanceRuntime
 from vcs_scanner.output_modules.output_module import OutputModule
 
@@ -31,20 +30,26 @@ class STDOUTWriter(OutputModule):
         self,
         exit_code_warn: int,
         exit_code_block: int,
-        toml_rule_file_path: str = None,
         include_tags: list[str] = None,
         ignore_tags: list[str] = None,
         working_dir: str = "",
-        ignore_findings_path: str = "",
+        ignore_findings_providers: IgnoredListProvider = IgnoredListProvider(None),
+        rule_tag_provider: RuleTagProvider = RuleTagProvider(),
+        rule_comment_provider: RuleCommentProvider = RuleCommentProvider(),
     ):
-        self.toml_rule_file_path: str = toml_rule_file_path
         self.exit_code_warn: int = exit_code_warn
         self.exit_code_block: int = exit_code_block
         self.include_tags: list[str] = include_tags
         self.ignore_tags: list[str] = ignore_tags
         self.exit_code_success = 0
         self.working_dir = working_dir
-        self.ignore_findings_providers: IgnoredListProvider = IgnoredListProvider(ignore_findings_path)
+        self.ignore_findings_providers: IgnoredListProvider = ignore_findings_providers
+        self.rule_tag_provider: RuleTagProvider = rule_tag_provider
+        self.rule_comment_provider: RuleCommentProvider = rule_comment_provider
+
+    def load_rules(self, toml_rule_file_path: str) -> None:
+        self.rule_tag_provider.load(toml_rule_file_path)
+        self.rule_comment_provider.load(toml_rule_file_path)
 
     def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         vcs_instance = VCSInstanceRead(
@@ -124,7 +129,9 @@ class STDOUTWriter(OutputModule):
 
         return rule_action
 
-    def write_findings(self, scan_id: int, repository_id: int, scan_findings: list[FindingCreate]):
+    def write_findings(
+        self, scan_id: int, repository_id: int, scan_findings: list[FindingCreate], repository_name: str = ""
+    ):
         """
             Write the findings to the STDOUT in a nice table and set the exit code based on the FindingActions found
         :param scan_id:
@@ -152,10 +159,10 @@ class STDOUTWriter(OutputModule):
         info_count = 0
 
         exit_code = self.exit_code_success
-        rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
-        rule_comments = get_rule_comment(self.toml_rule_file_path) if self.toml_rule_file_path else None
+        rule_tags = self.rule_tag_provider.get_rule_tags()
         ignore_dictionary = self.ignore_findings_providers.get_ignore_list()
         for finding in scan_findings:
+            logger.debug(finding.commit_id)
             should_process = should_process_finding(
                 finding=finding,
                 rule_tags=rule_tags,
@@ -190,7 +197,7 @@ class STDOUTWriter(OutputModule):
                     elif finding_action == FindingAction.BLOCK:
                         exit_code = self.exit_code_block
 
-                comment = rule_comments.get(finding.rule_name, "") if rule_comments else ""
+                comment = self.rule_comment_provider.get_comment().get(finding.rule_name, "")
 
                 output_table.add_row(
                     [
@@ -250,5 +257,34 @@ class STDOUTWriter(OutputModule):
             rule_pack=rule_pack,
         )
 
-    def get_last_scan_for_repository(self, repository: Repository) -> ScanRead:
+    def get_last_scan_for_repository(self, repository: Repository) -> ScanRead | None:
         return None
+
+    @staticmethod
+    def make(args: Namespace) -> "STDOUTWriter":
+        """
+            Get the STDOUT writer given the args provided.
+
+        :param args:
+            Namespace object containing the CLI arguments
+        """
+        rule_tag_provider = RuleTagProvider()
+        rule_tag_provider.load(args.gitleaks_rules_path)
+
+        rule_comment_provider = RuleCommentProvider()
+        rule_comment_provider.load(args.gitleaks_rules_path)
+
+        ignored_finding_provider = IgnoredListProvider(args.ignored_blocker_path)
+
+        output_plugin = STDOUTWriter(
+            exit_code_warn=args.exit_code_warn,
+            exit_code_block=args.exit_code_block,
+            include_tags=args.include_tags,
+            ignore_tags=args.ignore_tags,
+            working_dir=args.dir,
+            ignore_findings_providers=ignored_finding_provider,
+            rule_tag_provider=rule_tag_provider,
+            rule_comment_provider=rule_comment_provider,
+        )
+
+        return output_plugin

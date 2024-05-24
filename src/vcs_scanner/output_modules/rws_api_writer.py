@@ -5,6 +5,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
+from argparse import Namespace
 
 # Third Party
 from resc_backend.constants import TEMP_RULE_FILE
@@ -36,9 +37,10 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file
-from vcs_scanner.helpers.finding_filter import get_rule_tags, should_process_finding
+from vcs_scanner.helpers.finding_filter import should_process_finding
 from vcs_scanner.model import VCSInstanceRuntime
 from vcs_scanner.output_modules.output_module import OutputModule
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 
 logger = logging.getLogger(__name__)
 
@@ -47,14 +49,17 @@ class RESTAPIWriter(OutputModule):
     def __init__(
         self,
         rws_url,
-        toml_rule_file_path: str = None,
         ignore_tags: list[str] = None,
         include_tags: list[str] = None,
+        rule_tag_provider: RuleTagProvider = RuleTagProvider(),
     ):
         self.rws_url = rws_url
-        self.toml_rule_file_path = toml_rule_file_path
         self.ignore_tags = ignore_tags
         self.include_tags = include_tags
+        self.rule_tag_provider: RuleTagProvider = rule_tag_provider
+
+    def load_rules(self, toml_rule_file_path: str) -> None:
+        self.rule_tag_provider.load(toml_rule_file_path)
 
     def write_vcs_instance(self, vcs_instance_runtime: VCSInstanceRuntime) -> VCSInstanceRead | None:
         created_vcs_instance = None
@@ -89,10 +94,17 @@ class RESTAPIWriter(OutputModule):
         scan_id: int,
         repository_id: int,
         scan_findings: list[FindingBase],
+        repository_name: str = "",
     ) -> None:
         findings_create = []
-        rule_tags = get_rule_tags(self.toml_rule_file_path) if self.toml_rule_file_path else None
+
+        rule_tags = self.rule_tag_provider.get_rule_tags()
         for finding in scan_findings:
+            # We strip the repository name here because in the case of
+            # scan as dir the path of the finding is prefixed with the repository name
+            if finding.author == "vcs-scanner":
+                finding.file_path = finding.file_path.removeprefix(repository_name + "/")
+
             new_finding = FindingCreate.create_from_base_class(base_object=finding, repository_id=repository_id)
 
             if should_process_finding(
@@ -230,3 +242,22 @@ class RESTAPIWriter(OutputModule):
         else:
             rule_pack_version = self.download_rule_pack()
         return rule_pack_version
+
+    @staticmethod
+    def make(args: Namespace) -> "RESTAPIWriter":
+        """
+            Get the Rest API writer given the args provided.
+
+        :param args:
+            Namespace object containing the CLI arguments
+        """
+        rule_tag_provider = RuleTagProvider()
+        rule_tag_provider.load(args.gitleaks_rules_path)
+
+        output_plugin = RESTAPIWriter(
+            rws_url=args.rws_url,
+            include_tags=args.include_tags,
+            ignore_tags=args.ignore_tags,
+            rule_tag_provider=rule_tag_provider,
+        )
+        return output_plugin

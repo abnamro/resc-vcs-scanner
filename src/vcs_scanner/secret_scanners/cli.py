@@ -21,7 +21,9 @@ from vcs_scanner.helpers.cli import create_cli_argparser
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
+from vcs_scanner.secret_scanners.git_operation import read_repo_from_local
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 logger_config = initialise_logs(LOG_FILE_PATH_CLI)
 logger = logging.getLogger(__name__)
@@ -109,7 +111,7 @@ def scan_repository_from_cli():
     elif args.command == "repo":
         if args.repository_location == "local":
             logger.info(f"Scanning repository local {args.dir.absolute()}")
-            args.repo_url = FAKE_URL
+            args.repo_url = fetch_url_from_dot_git_config(args.dir.absolute())
             args.username = None
             args.password = None
         elif args.repository_location == "remote":
@@ -117,6 +119,14 @@ def scan_repository_from_cli():
         scan_repository(args)
 
 
+def fetch_url_from_dot_git_config(path: str):
+    if not os.path.exists(path / ".git/config"):
+        return FAKE_URL
+
+    return read_repo_from_local(path)
+
+
+# TODO refactor and merge scan_directory / scan_repository to avoid code duplication.
 def scan_directory(args: Namespace):
     """
         Start the process of scanning a non-git directory
@@ -132,32 +142,29 @@ def scan_directory(args: Namespace):
         latest_commit=FAKE_COMMIT,
     )
 
-    output_plugin = STDOUTWriter(
-        toml_rule_file_path=args.gitleaks_rules_path,
-        exit_code_warn=args.exit_code_warn,
-        exit_code_block=args.exit_code_block,
-        include_tags=args.include_tags,
-        ignore_tags=args.ignore_tags,
-        working_dir=args.dir,
-        ignore_findings_path=args.ignored_blocker_path,
-    )
-    with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
-        rule_pack_version = get_rule_pack_version_from_file(rule_pack.read())
+    output_plugin = STDOUTWriter.make(args)
+    rule_pack_version = _get_rule_pack_version(args)
+
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
+    gitleaks_rules_provider = RuleFileProvider(args.gitleaks_rules_path, init=True)
+
     secret_scanner = SecretScanner(
         gitleaks_binary_path=args.gitleaks_path,
-        gitleaks_rules_path=args.gitleaks_rules_path,
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version=rule_pack_version,
         output_plugin=output_plugin,
         repository=repository.convert_to_repository(vcs_instance_id=1),
         username="",
         personal_access_token="",
         local_path=f"{args.dir.absolute()}",
+        # we force a base scan because it does not matter
+        # in this use case: we are not sending data to RESC.
+        force_base_scan=True,
     )
 
-    secret_scanner.run_directory_scan()
+    secret_scanner.run_scan(as_dir=True)
 
 
 def scan_repository(args: Namespace):
@@ -179,32 +186,21 @@ def scan_repository(args: Namespace):
     )
 
     if args.rws_url:
-        output_plugin = RESTAPIWriter(
-            rws_url=args.rws_url,
-            toml_rule_file_path=args.gitleaks_rules_path,
-            include_tags=args.include_tags,
-            ignore_tags=args.ignore_tags,
-        )
+        output_plugin = RESTAPIWriter.make(args)
         rule_pack_version = output_plugin.download_rule_pack()
 
     else:
-        output_plugin = STDOUTWriter(
-            toml_rule_file_path=args.gitleaks_rules_path,
-            exit_code_warn=args.exit_code_warn,
-            exit_code_block=args.exit_code_block,
-            include_tags=args.include_tags,
-            ignore_tags=args.ignore_tags,
-            working_dir=args.dir,
-            ignore_findings_path=args.ignored_blocker_path,
-        )
-        with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
-            rule_pack_version = get_rule_pack_version_from_file(rule_pack.read())
+        output_plugin = STDOUTWriter.make(args)
+        rule_pack_version = _get_rule_pack_version(args)
+
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
+    gitleaks_rules_provider = RuleFileProvider(args.gitleaks_rules_path, init=True)
+
     secret_scanner = SecretScanner(
         gitleaks_binary_path=args.gitleaks_path,
-        gitleaks_rules_path=args.gitleaks_rules_path,
+        gitleaks_rules_provider=gitleaks_rules_provider,
         rule_pack_version=rule_pack_version,
         output_plugin=output_plugin,
         repository=repository.convert_to_repository(vcs_instance_id=1),
@@ -215,7 +211,7 @@ def scan_repository(args: Namespace):
         latest_commit="unknown",
     )
 
-    secret_scanner.run_repository_scan()
+    secret_scanner.run_scan(as_repo=True)
 
 
 def guess_vcs_provider(repo_url: str) -> VCSProviders:
@@ -252,3 +248,8 @@ def determine_vcs_name(repo_url: str, vcs_type: VCSProviders) -> str:
         elif vcs_type == VCSProviders.BITBUCKET:
             vcs_name = CLI_VCS_BITBUCKET
     return vcs_name
+
+
+def _get_rule_pack_version(args: Namespace) -> str | None:
+    with open(args.gitleaks_rules_path, encoding="utf-8") as rule_pack:
+        return get_rule_pack_version_from_file(rule_pack.read())

@@ -16,7 +16,7 @@ def clone_repository(
     repo_clone_path: str,
     username: str = "",
     personal_access_token: str = "",
-) -> None:
+) -> str:
     """
         Clones the given repository
     :param repository_url:
@@ -30,5 +30,20 @@ def clone_repository(
     """
     url = repository_url.replace("https://", "")
     repo_clone_url = f"https://{username}:{personal_access_token}@{url}"
-    Repo.clone_from(repo_clone_url, repo_clone_path)
+    repo = Repo.clone_from(repo_clone_url, repo_clone_path)
     logger.debug(f"Repository {repository_url} cloned successfully")
+    return repo.head.object.hexsha
+
+
+def read_repo_from_local(path_to_dir: str) -> str:
+    """Given a path returns the remote address of the repository
+
+    Args:
+        path_to_dir (str): Path to the repo (.git must be in that directory)
+
+    Returns:
+        str: Url of the repository
+    """
+    repo = Repo(path_to_dir)
+    logger.debug(repo.remotes[0].url)
+    return repo.remotes[0].url

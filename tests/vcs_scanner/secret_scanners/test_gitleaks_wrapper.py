@@ -1,5 +1,6 @@
 # Standard Library
 import sys
+from datetime import datetime, UTC
 
 # Third Party
 from _pytest.monkeypatch import MonkeyPatch
@@ -38,18 +39,21 @@ def test_repository_scanner_calculate_permanent_leak_url():
     )
 
 
-def test_repository_scanner_is_valid_timestamp():
+def test_repository_scanner_get_valid_timestamp():
     timestamp_input = "2020-08-07T16:31:11+02:00"
-    timestamp_output = GitLeaksWrapper._is_valid_timestamp(timestamp_input)
+    timestamp_output = GitLeaksWrapper._get_valid_timestamp(timestamp_input)
 
-    assert timestamp_output
+    assert (
+        timestamp_output.astimezone(UTC).isoformat()[:19]
+        == datetime(2020, 8, 7, 14, 31, 11, tzinfo=UTC).isoformat()[:19]
+    )
 
 
-def test_repository_scanner_is_valid_timestamp_invalid():
+def test_repository_scanner_get_valid_timestamp_invalid():
     timestamp_input = "2020-18-07T16:31:11+02:00"
-    timestamp_output = GitLeaksWrapper._is_valid_timestamp(timestamp_input)
+    timestamp_output = GitLeaksWrapper._get_valid_timestamp(timestamp_input)
 
-    assert not timestamp_output
+    assert timestamp_output.isoformat()[:19] == datetime.now(UTC).isoformat()[:19]
 
 
 def test_secret_scanner_build_gitleaks_command_with_custom_exit_code():
