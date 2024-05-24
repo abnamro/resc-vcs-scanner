@@ -221,9 +221,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             f"Started task for scanning {self._repo_clone_path} using rule pack version: {self.rule_pack_version}"
         )
         scan_timestamp_start = datetime.now(UTC)
-        self._findings_from_repo = self._scan_repo(
-            self._scan_type_to_run, self._last_scanned_commit
-        )
+        self._findings_from_repo = self._scan_repo(self._scan_type_to_run, self._last_scanned_commit)
         scan_timestamp_end = datetime.now(UTC)
         logger.info(
             f"Running {self._scan_type_to_run} scan on repository "
