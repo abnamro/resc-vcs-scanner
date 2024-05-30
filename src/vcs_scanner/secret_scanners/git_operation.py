@@ -6,7 +6,7 @@ import os
 os.environ["GIT_PYTHON_REFRESH"] = "quiet"
 
 # Third Party
-from git import Repo  # noqa: E402
+from git import Repo, Commit  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,7 @@ def clone_repository(
     repo_clone_path: str,
     username: str = "",
     personal_access_token: str = "",
-) -> str:
+) -> Commit:
     """
         Clones the given repository
     :param repository_url:
@@ -32,7 +32,7 @@ def clone_repository(
     repo_clone_url = f"https://{username}:{personal_access_token}@{url}"
     repo = Repo.clone_from(repo_clone_url, repo_clone_path)
     logger.debug(f"Repository {repository_url} cloned successfully")
-    return repo.head.object.hexsha
+    return repo.head.commit
 
 
 def read_repo_from_local(path_to_dir: str) -> str:
