@@ -9,6 +9,7 @@ from datetime import datetime, UTC
 from collections.abc import Callable
 
 # Third Party
+from git import Commit
 from resc_backend.resc_web_service.schema.finding import FindingBase
 from resc_backend.resc_web_service.schema.repository import Repository
 from resc_backend.resc_web_service.schema.repository import RepositoryBase
@@ -58,7 +59,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self.local_path = local_path
         self.force_base_scan = force_base_scan
         self.latest_commit = latest_commit
-        self.head_commit: None | str = None
+        self.head_commit: None | Commit = None
 
         self._as_dir: bool = False
         self._as_repo: bool = False
@@ -353,7 +354,9 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return True
 
     def _populate_if_empty(self, finding: FindingBase) -> FindingBase:
-        finding.commit_id = finding.commit_id or self.head_commit or "unknown"
+        finding.commit_id = finding.commit_id or self.head_commit.hexsha or "unknown"
+        finding.commit_message = finding.commit_message or self.head_commit.message
+        finding.commit_timestamp = finding.commit_timestamp or self.head_commit.committed_date
         finding.author = finding.author or "vcs-scanner"
         return finding
 
