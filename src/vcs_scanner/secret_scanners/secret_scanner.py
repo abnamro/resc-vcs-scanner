@@ -354,9 +354,15 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         return True
 
     def _populate_if_empty(self, finding: FindingBase) -> FindingBase:
-        finding.commit_id = finding.commit_id or self.head_commit.hexsha or "unknown"
-        finding.commit_message = finding.commit_message or self.head_commit.message
-        finding.commit_timestamp = finding.commit_timestamp or self.head_commit.committed_date
+        finding.commit_id = finding.commit_id or (
+            self.head_commit.hexsha if self.head_commit is not None else "unknown"
+        )
+        finding.commit_message = finding.commit_message or (
+            self.head_commit.message if self.head_commit is not None else ""
+        )
+        finding.commit_timestamp = finding.commit_timestamp or (
+            self.head_commit.committed_date if self.head_commit is not None else datetime.now(UTC)
+        )
         finding.author = finding.author or "vcs-scanner"
         return finding
 
