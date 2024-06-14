@@ -5,24 +5,22 @@ import os
 import shutil
 import time
 import uuid
-from datetime import datetime, UTC
 from collections.abc import Callable
+from datetime import UTC, datetime
 
 # Third Party
 from git import Commit
 from resc_backend.resc_web_service.schema.finding import FindingBase
-from resc_backend.resc_web_service.schema.repository import Repository
-from resc_backend.resc_web_service.schema.repository import RepositoryBase
-from resc_backend.resc_web_service.schema.scan import Scan
-from resc_backend.resc_web_service.schema.scan import ScanRead
+from resc_backend.resc_web_service.schema.repository import Repository, RepositoryBase
+from resc_backend.resc_web_service.schema.scan import Scan, ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.output_modules.output_module import OutputModule
 from vcs_scanner.resc_worker import RESCWorker
 from vcs_scanner.secret_scanners.git_operation import clone_repository
 from vcs_scanner.secret_scanners.gitleaks_wrapper import GitLeaksWrapper
-from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 # This is an arbitrary number to distinguish between no issues, an error and
 # the situation in which leaks are found. Note that this number cannot be bigger than 255 (OS limitation)

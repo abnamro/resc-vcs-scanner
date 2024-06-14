@@ -1,5 +1,5 @@
 # Standard Library
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import call, patch
 
@@ -13,10 +13,10 @@ from resc_backend.resc_web_service.schema.repository import (
 from resc_backend.resc_web_service.schema.scan import ScanRead
 
 # First Party
-from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 from vcs_scanner.helpers.providers.ignore_list import IgnoredListProvider
 from vcs_scanner.helpers.providers.rule_comment import RuleCommentProvider
 from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
+from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 
 THIS_DIR = Path(__file__).parent.parent
 

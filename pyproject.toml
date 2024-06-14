@@ -24,7 +24,7 @@ select = [
     # flake8-annotations
     # "ANN",
     # isort
-    # "I",
+    "I",
     ]
 ignore = ["ANN101","ANN102"]
 

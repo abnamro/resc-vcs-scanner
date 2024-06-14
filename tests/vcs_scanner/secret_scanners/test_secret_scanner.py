@@ -1,6 +1,6 @@
 # Standard Library
 import sys
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 # Third Party
@@ -10,8 +10,8 @@ from resc_backend.resc_web_service.schema.scan import ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 
 # First Party
-from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
+from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 
 sys.path.insert(0, "src")
 

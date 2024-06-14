@@ -1,8 +1,8 @@
 # Standard Library
 import logging
 import sys
-from datetime import datetime, UTC
 from argparse import Namespace
+from datetime import UTC, datetime
 
 # Third Party
 from prettytable import PrettyTable
