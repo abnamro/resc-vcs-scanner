@@ -13,3 +13,9 @@ version = "2.0.13"
 	description = "Another Fake rule"
 	regex = '''something'''
 	tags = ["Block", "ScanAsDir"]
+
+[[rules]]
+	id = "rule_6"
+	description = "Fake rule"
+	regex = '''something'''
+	tags = ["Block"]

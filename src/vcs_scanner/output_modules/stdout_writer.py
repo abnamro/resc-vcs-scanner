@@ -127,6 +127,11 @@ class STDOUTWriter(OutputModule):
         if key in ignore_dictionary:
             return FindingAction.IGNORED
 
+        # Wildcard check.
+        key: str = finding_path + "|" + finding.rule_name + "|*"
+        if key in ignore_dictionary:
+            return FindingAction.IGNORED
+
         return rule_action
 
     def write_findings(
