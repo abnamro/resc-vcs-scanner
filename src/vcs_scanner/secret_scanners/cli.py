@@ -18,12 +18,12 @@ from vcs_scanner.constants import (
     LOG_FILE_PATH_CLI,
 )
 from vcs_scanner.helpers.cli import create_cli_argparser
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
 from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 from vcs_scanner.secret_scanners.git_operation import read_repo_from_local
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
-from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 
 logger_config = initialise_logs(LOG_FILE_PATH_CLI)
 logger = logging.getLogger(__name__)

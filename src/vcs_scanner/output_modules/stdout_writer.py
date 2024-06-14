@@ -1,8 +1,8 @@
 # Standard Library
 import logging
 import sys
-from datetime import datetime, UTC
 from argparse import Namespace
+from datetime import UTC, datetime
 
 # Third Party
 from prettytable import PrettyTable
@@ -124,6 +124,11 @@ class STDOUTWriter(OutputModule):
             finding_path = finding_path[path_length:]
 
         key: str = finding_path + "|" + finding.rule_name + "|" + str(finding.line_number)
+        if key in ignore_dictionary:
+            return FindingAction.IGNORED
+
+        # Wildcard check.
+        key: str = finding_path + "|" + finding.rule_name + "|*"
         if key in ignore_dictionary:
             return FindingAction.IGNORED
 

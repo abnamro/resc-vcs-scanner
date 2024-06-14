@@ -20,3 +20,9 @@ version = "2.0.13"
 	regex = '''something'''
 	tags = ["Warn"]
 	comment = "See rule 3."
+
+[[rules]]
+	id = "rule_6"
+	description = "Another Fake rule"
+	regex = '''something'''
+	tags = ["Block"]

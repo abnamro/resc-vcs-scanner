@@ -6,17 +6,17 @@ import os
 # Third Party
 from celery import Celery
 from celery.utils.log import get_task_logger
-from resc_backend.constants import TEMP_RULE_FILE, TEMP_RULE_DIR_FILE, TEMP_RULE_REPO_FILE
+from resc_backend.constants import TEMP_RULE_DIR_FILE, TEMP_RULE_FILE, TEMP_RULE_REPO_FILE
 from resc_backend.resc_web_service.schema.repository import Repository
 
 # First Party
 from vcs_scanner.common import initialise_logs, load_vcs_instances
 from vcs_scanner.constants import LOG_FILE_PATH
 from vcs_scanner.helpers.environment_wrapper import validate_environment
+from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
-from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
-from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.secret_scanners.configuration import (
     GITLEAKS_PATH,
     RABBITMQ_DEFAULT_VHOST,

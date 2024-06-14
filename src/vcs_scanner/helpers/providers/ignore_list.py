@@ -2,7 +2,7 @@
 # Standard Library
 import csv
 import logging
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 # Third Party
 

@@ -6,7 +6,7 @@ import os
 os.environ["GIT_PYTHON_REFRESH"] = "quiet"
 
 # Third Party
-from git import Repo, Commit  # noqa: E402
+from git import Commit, Repo  # noqa: E402
 
 logger = logging.getLogger(__name__)
 

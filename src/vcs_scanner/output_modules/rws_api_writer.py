@@ -3,9 +3,9 @@
 import json
 import logging
 import sys
+from argparse import Namespace
 from datetime import datetime
 from pathlib import Path
-from argparse import Namespace
 
 # Third Party
 from resc_backend.constants import TEMP_RULE_FILE
@@ -38,9 +38,9 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file
 from vcs_scanner.helpers.finding_filter import should_process_finding
+from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 from vcs_scanner.model import VCSInstanceRuntime
 from vcs_scanner.output_modules.output_module import OutputModule
-from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 # Standard Library
 import sys
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 # Third Party
 from _pytest.monkeypatch import MonkeyPatch

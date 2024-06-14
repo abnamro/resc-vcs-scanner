@@ -1,8 +1,8 @@
 # Standard Library
-from datetime import datetime, UTC
 import json
 import logging
 import subprocess
+from datetime import UTC, datetime
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingBase

@@ -3,8 +3,7 @@ import abc
 
 # Third Party
 from resc_backend.resc_web_service.schema.finding import FindingCreate
-from resc_backend.resc_web_service.schema.repository import Repository
-from resc_backend.resc_web_service.schema.repository import RepositoryBase
+from resc_backend.resc_web_service.schema.repository import Repository, RepositoryBase
 from resc_backend.resc_web_service.schema.scan import Scan, ScanRead
 from resc_backend.resc_web_service.schema.scan_type import ScanType
 from resc_backend.resc_web_service.schema.vcs_instance import VCSInstanceRead
