@@ -142,7 +142,7 @@ def test_write_findings_with_rules(info_log, exit_mock):
             "| Warn  | rule_3 |    3 | 3-3      | file_path_3 | See rule 3. |\n"
             "+-------+--------+------+----------+-------------+-------------+"
         ),
-        call("Findings detected : Total - 5, Block - 2, Warn - 1, Info - 2"),
+        call("Findings detected : Total - 6, Block - 3, Warn - 1, Info - 2"),
         call("Scan failed due to policy violations: [Block:2]"),
         call("Findings threshold check results: FAIL"),
     ]
@@ -204,7 +204,7 @@ def test_write_findings_with_rules_and_ignore(info_log, exit_mock):
             "| Warn    | rule_3 |    3 | 3-3      | file_path_3 | See rule 3. |\n"
             "+---------+--------+------+----------+-------------+-------------+"
         ),
-        call("Findings detected : Total - 5, Block - 1, Warn - 2, Info - 2"),
+        call("Findings detected : Total - 6, Block - 1, Warn - 3, Info - 2"),
         call("Scan failed due to policy violations: [Block:1]"),
         call("Findings threshold check results: FAIL"),
     ]
@@ -267,7 +267,7 @@ def test_write_findings_with_rules_and_ignore_with_directory(info_log, exit_mock
             "| Warn    | rule_3 |    3 | 3-3      | directory_path/file_path_3 | See rule 3. |\n"
             "+---------+--------+------+----------+----------------------------+-------------+"
         ),
-        call("Findings detected : Total - 5, Block - 1, Warn - 2, Info - 2"),
+        call("Findings detected : Total - 6, Block - 1, Warn - 3, Info - 2"),
         call("Scan failed due to policy violations: [Block:1]"),
         call("Findings threshold check results: FAIL"),
     ]
