@@ -3,6 +3,7 @@ import logging
 
 import tomlkit
 from resc_backend.constants import RULE_TAG_SCAN_AS_DIR
+
 from vcs_scanner.helpers.gitleaks_types import GitLeaksConfigToml, RuleToml
 
 logger = logging.getLogger(__name__)
