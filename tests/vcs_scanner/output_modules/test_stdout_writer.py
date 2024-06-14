@@ -143,7 +143,7 @@ def test_write_findings_with_rules(info_log, exit_mock):
             "+-------+--------+------+----------+-------------+-------------+"
         ),
         call("Findings detected : Total - 6, Block - 3, Warn - 1, Info - 2"),
-        call("Scan failed due to policy violations: [Block:2]"),
+        call("Scan failed due to policy violations: [Block:3]"),
         call("Findings threshold check results: FAIL"),
     ]
     info_log.assert_has_calls(calls, any_order=True)
