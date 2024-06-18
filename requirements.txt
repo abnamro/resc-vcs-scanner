@@ -1,9 +1,9 @@
 celery==5.4.0
 amqp==5.2.0
 requests==2.32.0
-pydantic==1.10.15
+pydantic==1.10.16
 GitPython==3.1.43
-resc-backend==3.3.7
+resc-backend==3.3.8
 tenacity==8.3.0
 prettytable==3.10.0
 termcolor==2.4.0
