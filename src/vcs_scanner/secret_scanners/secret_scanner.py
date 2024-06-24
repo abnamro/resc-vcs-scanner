@@ -87,22 +87,22 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self._as_dir = as_dir
         self._as_repo = as_repo
 
-        try:
-            pipes: list[Callable[[], bool]] = [
-                self._is_valid,
-                self._is_scan_needed_from_latest_commit,
-                self._create_repository,
-                self._fetch_last_scanned_commit,
-                self._is_scan_needed,
-                self._start_timer,
-                self._create_scan,
-                self._clone_repo,
-                self._run_repo_scan,
-                self._run_dir_scan,
-                self._merge_findings,
-                self._write_findings,
-            ]
+        pipes: list[Callable[[], bool]] = [
+            self._is_valid,
+            self._is_scan_needed_from_latest_commit,
+            self._create_repository,
+            self._fetch_last_scanned_commit,
+            self._is_scan_needed,
+            self._start_timer,
+            self._create_scan,
+            self._clone_repo,
+            self._run_repo_scan,
+            self._run_dir_scan,
+            self._merge_findings,
+            self._write_findings,
+        ]
 
+        try:
             for pipe in pipes:
                 # If the pipe does not succeed we exit immediately.
                 if not pipe():
@@ -381,8 +381,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
     def _cleaning_up(self) -> True:
         # Make sure the tempfile and repo cloned path removed
         logger.info(f"Cleaning up: {self._repo_clone_path}")
-        if self.local_path is not None:
-            logger.error("FML")
+        if self._repo_clone_path and not os.path.exists(self._repo_clone_path):
+            logger.error(f"path {self._repo_clone_path} does not exists")
         if self._repo_clone_path and not self.local_path and os.path.exists(self._repo_clone_path):
             logger.debug(f"Cleaning up the repository cloned directory: {self._repo_clone_path}")
             try:
