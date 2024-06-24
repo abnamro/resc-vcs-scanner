@@ -107,7 +107,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 # If the pipe does not succeed we exit immediately.
                 if not pipe():
                     return
-        except:
+        except BaseException:
             logger.error(f"An error occurred while scanning {self.repository.repository_name}")
         finally:
             self._cleaning_up()
@@ -387,6 +387,6 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             logger.debug(f"Cleaning up the repository cloned directory: {self._repo_clone_path}")
             try:
                 shutil.rmtree(self._repo_clone_path)
-            except:
+            except BaseException:
                 logger.error(f"Failed to remove the repository cloned directory: {self._repo_clone_path}")
         return True
