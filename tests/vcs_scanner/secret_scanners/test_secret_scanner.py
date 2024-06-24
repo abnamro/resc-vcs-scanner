@@ -56,7 +56,7 @@ def test_clone_repo(clone_from):
     )
 
     secret_scanner._clone_repo()
-    assert secret_scanner._repo_clone_path == f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
+    assert secret_scanner._repo_clone_path == f"./{repository.repository_name}"
 
     url = repository.repository_url.replace("https://", "")
     expected_repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"

@@ -40,7 +40,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         repository: Repository,
         username: str,
         personal_access_token: str,
-        scan_tmp_directory: str = "./cloned_repository",
+        scan_tmp_directory: str = ".",
         local_path: str | None = None,
         force_base_scan: bool = False,
         latest_commit: str | None = None,
