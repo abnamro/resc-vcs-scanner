@@ -40,7 +40,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         repository: Repository,
         username: str,
         personal_access_token: str,
-        scan_tmp_directory: str = ".",
+        scan_tmp_directory: str = "./cloned_repository",
         local_path: str | None = None,
         force_base_scan: bool = False,
         latest_commit: str | None = None,
@@ -87,26 +87,30 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self._as_dir = as_dir
         self._as_repo = as_repo
 
-        pipes: list[Callable[[], bool]] = [
-            self._is_valid,
-            self._is_scan_needed_from_latest_commit,
-            self._create_repository,
-            self._fetch_last_scanned_commit,
-            self._is_scan_needed,
-            self._start_timer,
-            self._create_scan,
-            self._clone_repo,
-            self._run_repo_scan,
-            self._run_dir_scan,
-            self._merge_findings,
-            self._write_findings,
-            self._cleaning_up,
-        ]
+        try:
+            pipes: list[Callable[[], bool]] = [
+                self._is_valid,
+                self._is_scan_needed_from_latest_commit,
+                self._create_repository,
+                self._fetch_last_scanned_commit,
+                self._is_scan_needed,
+                self._start_timer,
+                self._create_scan,
+                self._clone_repo,
+                self._run_repo_scan,
+                self._run_dir_scan,
+                self._merge_findings,
+                self._write_findings,
+            ]
 
-        for pipe in pipes:
-            # If the pipe does not succeed we exit immediately.
-            if not pipe():
-                return
+            for pipe in pipes:
+                # If the pipe does not succeed we exit immediately.
+                if not pipe():
+                    return
+        except:
+            logger.error(f"An error occurred while scanning {self.repository.repository_name}")
+        finally:
+            self._cleaning_up()
 
     def _is_valid(self) -> bool:
         if not self._as_dir and not self._as_repo:
@@ -376,7 +380,13 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
     def _cleaning_up(self) -> True:
         # Make sure the tempfile and repo cloned path removed
+        logger.info(f"Cleaning up: {self._repo_clone_path}")
+        if self.local_path is not None:
+            logger.error("FML")
         if self._repo_clone_path and not self.local_path and os.path.exists(self._repo_clone_path):
             logger.debug(f"Cleaning up the repository cloned directory: {self._repo_clone_path}")
-            shutil.rmtree(self._repo_clone_path)
+            try:
+                shutil.rmtree(self._repo_clone_path)
+            except:
+                logger.error(f"Failed to remove the repository cloned directory: {self._repo_clone_path}")
         return True
