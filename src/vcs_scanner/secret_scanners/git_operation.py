@@ -28,7 +28,7 @@ def clone_repository(
     :param personal_access_token:
         Personal access token|password to clone the repository, only needed if the repository is private
     """
-    url = repository_url.replace("https://", "")
+    url = str(repository_url).replace("https://", "")
     repo_clone_url = f"https://{username}:{personal_access_token}@{url}"
     repo = Repo.clone_from(repo_clone_url, repo_clone_path)
     logger.debug(f"Repository {repository_url} cloned successfully")

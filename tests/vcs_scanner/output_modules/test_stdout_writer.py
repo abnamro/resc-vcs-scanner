@@ -26,7 +26,7 @@ THIS_DIR = Path(__file__).parent.parent
 def test_write_correct_repository(info_log):
     repository = RepositoryCreate(
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -281,7 +281,7 @@ def test_write_scan(info_log):
     repository = RepositoryRead(
         id_=1,
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -289,7 +289,7 @@ def test_write_scan(info_log):
     expected_result = ScanRead(
         last_scanned_commit="NONE",
         timestamp=datetime.now(UTC),
-        repository_id=1,
+        repository_id=str(1),
         id_=1,
         rule_pack=rule_pack,
     )
@@ -324,7 +324,7 @@ def test_get_last_scanned_commit():
     repository = RepositoryRead(
         id_=1,
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,

@@ -26,7 +26,7 @@ def test_write_correct_repository(post):
 
     repository = RepositoryCreate(
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -40,7 +40,7 @@ def test_write_correct_repository(post):
         vcs_instance=repository.vcs_instance,
     )
 
-    expected_json = expected_result.json()
+    expected_json = expected_result.model_dump_json()
 
     post.return_value.status_code = 201
     post.return_value.text = expected_json
@@ -57,7 +57,7 @@ def test_write_incorrect_repository(warning, post):
 
     repository = RepositoryCreate(
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -71,7 +71,7 @@ def test_write_incorrect_repository(warning, post):
         vcs_instance=repository.vcs_instance,
     )
 
-    expected_json = expected_result.json()
+    expected_json = expected_result.model_dump_json()
 
     post.return_value.status_code = 404
     post.return_value.text = expected_json
@@ -134,7 +134,7 @@ def test_write_scan(post):
     repository = RepositoryRead(
         id_=1,
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -149,7 +149,7 @@ def test_write_scan(post):
         rule_pack="0.0.0",
     )
 
-    expected_json = expected_result.json()
+    expected_json = expected_result.model_dump_json()
 
     post.return_value.status_code = 201
     post.return_value.text = expected_json
@@ -171,7 +171,7 @@ def test_write_scan_unsuccessful(warning, post):
     repository = RepositoryRead(
         id_=1,
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -186,7 +186,7 @@ def test_write_scan_unsuccessful(warning, post):
         rule_pack="0.0.0",
     )
 
-    expected_json = expected_result.json()
+    expected_json = expected_result.model_dump_json()
 
     post.return_value.status_code = 400
     post.return_value.text = expected_json
@@ -209,7 +209,7 @@ def test_get_last_scan_for_repository(get):
     repository = RepositoryRead(
         id_=1,
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
@@ -219,11 +219,11 @@ def test_get_last_scan_for_repository(get):
         last_scanned_commit="561dsf651t34544",
         timestamp=datetime.now(UTC),
         increment_number=0,
-        repository_id=1,
+        repository_id=str(1),
         rule_pack="0.0.0",
     )
 
-    expected_json = expected_result.json()
+    expected_json = expected_result.model_dump_json()
 
     get.return_value.status_code = 200
     get.return_value.text = expected_json
@@ -238,7 +238,7 @@ def test_get_last_scanned_commit_invalid_id(warning, get):
     repository = RepositoryRead(
         id_=2,
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="http://repository.url",
         vcs_instance=1,
