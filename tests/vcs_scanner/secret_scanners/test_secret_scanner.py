@@ -39,7 +39,7 @@ def test_clone_repo(clone_from):
 
     repository = Repository(
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="https://repository.url",
         vcs_instance=1,
@@ -58,7 +58,7 @@ def test_clone_repo(clone_from):
     secret_scanner._clone_repo()
     assert secret_scanner._repo_clone_path == f"./{repository.repository_name}"
 
-    url = repository.repository_url.replace("https://", "")
+    url = str(repository.repository_url).replace("https://", "")
     expected_repo_clone_path = f"{secret_scanner._scan_tmp_directory}/{repository.repository_name}"
     expected_repo_clone_url = f"https://{username}:{personal_access_token}@{url}"
     clone_from.assert_called_once()
@@ -74,7 +74,7 @@ def test_scan_repo(start_scan):
 
     repository = Repository(
         project_key="project_key",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="repository_name",
         repository_url="https://repository.url",
         vcs_instance=1,
@@ -102,7 +102,7 @@ def test_scan_directory(start_scan):
     rws_url = "https://fakeurl.com:8000"
     repository = Repository(
         project_key="local",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="local",
         repository_url="https://repository.url",
         vcs_instance=1,
@@ -127,7 +127,7 @@ def test_scan_directory(start_scan):
 def initialize_and_get_repo_scanner():
     repository = Repository(
         project_key="local",
-        repository_id=1,
+        repository_id=str(1),
         repository_name="local",
         repository_url="https://repository.url",
         vcs_instance=1,
@@ -176,7 +176,7 @@ def test_scan_type_is_base_when_a_latest_scan_is_present_and_rule_pack_is_latest
 
     scan_read = ScanRead(
         id_=1,
-        repository_id=1,
+        repository_id=str(1),
         scan_type=ScanType.BASE,
         last_scanned_commit="latest_commit_1",
         timestamp=datetime.now(UTC),
@@ -194,7 +194,7 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
 
     scan_read = ScanRead(
         id_=1,
-        repository_id=1,
+        repository_id=str(1),
         scan_type=ScanType.BASE,
         last_scanned_commit="latest_commit_1",
         timestamp=datetime.now(UTC),
@@ -212,7 +212,7 @@ def test_scan_type_is_incremental_when_a_latest_scan_is_present_and_rule_pack_is
 
     scan_read = ScanRead(
         id_=1,
-        repository_id=1,
+        repository_id=str(1),
         scan_type=ScanType.BASE,
         last_scanned_commit="latest_commit_1",
         timestamp=datetime.now(UTC),

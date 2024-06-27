@@ -20,6 +20,6 @@ def test_clone_repository(clone_from):
     )
 
     clone_from.assert_called_once()
-    url = repository_url.replace("https://", "")
+    url = str(repository_url).replace("https://", "")
     expected_repo_clone_url = f"https://{username}:{personal_access_token}@{url}"
     clone_from.assert_called_once_with(expected_repo_clone_url, repo_clone_path)
