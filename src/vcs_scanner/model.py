@@ -77,7 +77,7 @@ class VCSInstanceRuntime(BaseModel):
                 f"Username for VCS Instance {values.data['name']} "
                 "could not be found in the environment variable {value}"
             )
-        return os.environ.get(value)
+        return os.environ.get(value, "")
 
     @field_validator("token", mode="before")
     @classmethod
@@ -87,4 +87,4 @@ class VCSInstanceRuntime(BaseModel):
                 f"Token for VCS Instance {values.data['name']} "
                 "could not be found in the environment variable {value}"
             )
-        return os.environ.get(value)
+        return os.environ.get(value, "")
