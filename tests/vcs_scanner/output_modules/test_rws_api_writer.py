@@ -289,7 +289,7 @@ def test_download_rule_pack_unsuccessful(error, get):
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         result = RESTAPIWriter(rws_url=url).download_rule_pack(rule_pack_version)
         assert result is None
-        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.type is SystemExit
         assert pytest_wrapped_e.value.code == -1
         error.assert_called_once()
         error.assert_called_with(

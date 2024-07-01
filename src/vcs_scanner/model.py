@@ -1,5 +1,6 @@
 # pylint: disable=no-name-in-module
 # Standard Library
+import logging
 import os
 from typing import Annotated
 
@@ -7,6 +8,8 @@ from typing import Annotated
 from pydantic import BaseModel, Field, StringConstraints, field_validator
 from resc_backend.resc_web_service.schema.repository import Repository
 from resc_backend.resc_web_service.schema.vcs_provider import VCSProviders
+
+logger = logging.getLogger(__name__)
 
 
 class RepositoryRuntime(BaseModel):
@@ -69,19 +72,19 @@ class VCSInstanceRuntime(BaseModel):
     @field_validator("username", mode="before")
     @classmethod
     def check_presence_of_username(cls, value, values):
-        if not os.environ.get(value):
-            raise ValueError(
-                f"The username for VCS Instance {values.data['name']} could not be found in the "
-                f"environment variable {value}"
+        if not os.environ.get(value, ""):
+            logger.info(
+                f"Username for VCS Instance {values.data['name']} "
+                "could not be found in the environment variable {value}"
             )
-        return os.environ.get(value)
+        return os.environ.get(value, "")
 
     @field_validator("token", mode="before")
     @classmethod
     def check_presence_of_token(cls, value, values):
-        if not os.environ.get(value):
-            raise ValueError(
-                f"The access token for VCS Instance {values.data['name']} could not be found in the "
-                f"environment variable {value}"
+        if not os.environ.get(value, ""):
+            logger.info(
+                f"Token for VCS Instance {values.data['name']} "
+                "could not be found in the environment variable {value}"
             )
-        return os.environ.get(value)
+        return os.environ.get(value, "")
