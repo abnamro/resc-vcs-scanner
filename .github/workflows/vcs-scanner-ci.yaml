@@ -22,6 +22,17 @@ env:
 permissions: read-all
 
 jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Lint
+      - uses: chartboost/ruff-action@v1
+      # Format check
+      - uses: chartboost/ruff-action@v1
+        with:
+          args: 'format --check'
+
   python-basic-validation:
     name: Python Basic Validation
     runs-on: ubuntu-latest
