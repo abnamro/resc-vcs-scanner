@@ -1,7 +1,7 @@
 # pylint: disable=no-name-in-module
 # Standard Library
-import os
 import logging
+import os
 from typing import Annotated
 
 # Third Party
@@ -10,6 +10,7 @@ from resc_backend.resc_web_service.schema.repository import Repository
 from resc_backend.resc_web_service.schema.vcs_provider import VCSProviders
 
 logger = logging.getLogger(__name__)
+
 
 class RepositoryRuntime(BaseModel):
     repository_name: str
@@ -72,12 +73,18 @@ class VCSInstanceRuntime(BaseModel):
     @classmethod
     def check_presence_of_username(cls, value, values):
         if not os.environ.get(value, ""):
-            logger.info(f"Username for VCS Instance {values.data['name']} could not be found in the environment variable {value}")
+            logger.info(
+                f"Username for VCS Instance {values.data['name']} "
+                "could not be found in the environment variable {value}"
+            )
         return os.environ.get(value)
 
     @field_validator("token", mode="before")
     @classmethod
     def check_presence_of_token(cls, value, values):
         if not os.environ.get(value, ""):
-            logger.info(f"Token for VCS Instance {values.data['name']} could not be found in the environment variable {value}")
+            logger.info(
+                f"Token for VCS Instance {values.data['name']} "
+                "could not be found in the environment variable {value}"
+            )
         return os.environ.get(value)
