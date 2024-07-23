@@ -102,7 +102,7 @@ def get_rule_pack_version_from_file(file_content: str) -> str | None:
     return rule_pack_version
 
 
-def tag_list_addition(dest: list[str], src: list[str]) -> list[str]:
+def _tag_list_addition(dest: list[str], src: list[str]) -> list[str]:
     if not dest:
         return src
     if not src:
