@@ -90,6 +90,7 @@ class VCSInstanceRuntime(BaseModel):
                 "could not be found in the environment variable {value}"
             )
         return os.environ.get(value, "")
+
     @field_validator("include_tags", "ignore_tags", mode="before")
     @classmethod
     def check_tag_list(cls, value, validation_info):

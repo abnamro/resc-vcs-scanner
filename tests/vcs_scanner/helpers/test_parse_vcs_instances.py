@@ -74,6 +74,7 @@ def test_parse_vcs_instances_empty_tag_lists():
     case.assertCountEqual(vcs_instances_expected_base, vcs_instances_actual)
     assert result is False
 
+
 def test_parse_vcs_instances_no_tag_lists():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
     vcs_instances_json_no_tag_lists = (
@@ -89,6 +90,7 @@ def test_parse_vcs_instances_no_tag_lists():
     case: TestCase = TestCase()
     case.assertCountEqual(vcs_instances_expected_base, vcs_instances_actual)
     assert result is False
+
 
 def test_parse_vcs_instances():
     vcs_instances_actual: list[VCSInstanceRuntime] = []

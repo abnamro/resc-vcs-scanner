@@ -23,6 +23,7 @@ def parse_vcs_instances_contents(contents: str, vcs_instances: list[VCSInstanceR
             return True
     return False
 
+
 def parse_vcs_instances_file(filepath: str) -> list[VCSInstanceRuntime]:
     vcs_instances: list[VCSInstanceRuntime] = []
     errors_found = False
