@@ -17,7 +17,9 @@ vcs_instances_json_base = """
         "username": "AZURE_DEVOPS_USERNAME",
         "token": "AZURE_DEVOPS_TOKEN",
         "scope": ["GRD000DUMMY"],
-        "organization": "cbsp-abnamro",
+        "organization": "cbsp-abnamro"
+      }
+    }
 """
 
 vcs_instances_expected_base: list[VCSInstanceRuntime] = [
@@ -40,14 +42,12 @@ vcs_instances_expected_base: list[VCSInstanceRuntime] = [
 
 def test_parse_vcs_instances_null():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
-    vcs_instances_json_null = (
-        vcs_instances_json_base
-        + """
-        "include_tags": null,
-        "ignore_tags": null
-      }
-    }
-    """
+    vcs_instances_json_null = sub(
+        '"cbsp-abnamro"',
+        """"cbsp-abnamro",
+           "include_tags": null,
+           "ignore_tags": null""",
+        vcs_instances_json_base,
     )
 
     result = parse_vcs_instances_contents(vcs_instances_json_null, vcs_instances_actual)
@@ -59,14 +59,12 @@ def test_parse_vcs_instances_null():
 
 def test_parse_vcs_instances_empty_tag_lists():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
-    vcs_instances_json_empty = (
-        vcs_instances_json_base
-        + """
-        "include_tags": [],
-        "ignore_tags": []
-      }
-    }
-    """
+    vcs_instances_json_empty = sub(
+        '"cbsp-abnamro"',
+        """"cbsp-abnamro",
+           "include_tags": [],
+           "ignore_tags": []""",
+        vcs_instances_json_base,
     )
 
     result = parse_vcs_instances_contents(vcs_instances_json_empty, vcs_instances_actual)
@@ -78,15 +76,7 @@ def test_parse_vcs_instances_empty_tag_lists():
 
 def test_parse_vcs_instances_no_tag_lists():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
-    vcs_instances_json_no_tag_lists = (
-        sub('"cbsp-abnamro",', '"cbsp-abnamro"', vcs_instances_json_base)
-        + """
-      }
-    }
-    """
-    )
-
-    result = parse_vcs_instances_contents(vcs_instances_json_no_tag_lists, vcs_instances_actual)
+    result = parse_vcs_instances_contents(vcs_instances_json_base, vcs_instances_actual)
 
     case: TestCase = TestCase()
     case.assertCountEqual(vcs_instances_expected_base, vcs_instances_actual)
@@ -95,14 +85,12 @@ def test_parse_vcs_instances_no_tag_lists():
 
 def test_parse_vcs_instances():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
-    vcs_instances_json_full = (
-        vcs_instances_json_base
-        + """
-        "include_tags": ["Cli-only", "Github", "Azure"],
-        "ignore_tags": ["Bitbucket", "Sentinel"]
-      }
-    }
-    """
+    vcs_instances_json_full = sub(
+        '"cbsp-abnamro"',
+        """"cbsp-abnamro",
+           "include_tags": ["Cli-only", "Github", "Azure"],
+           "ignore_tags": ["Bitbucket", "Sentinel"]""",
+        vcs_instances_json_base,
     )
     vcs_instances_expected_full: list[VCSInstanceRuntime] = deepcopy(vcs_instances_expected_base)
     vcs_instances_expected_full[0].include_tags = ["Cli-only", "Github", "Azure"]
