@@ -101,6 +101,3 @@ def get_rule_pack_version_from_file(file_content: str) -> str | None:
     rule_pack_version = toml_rule_dictionary.get("version", None)
     return rule_pack_version
 
-
-def join_tag_lists(list_a: list[str], list_b: list[str]) -> list[str]:
-    return list(set(list_a) | set(list_b))
