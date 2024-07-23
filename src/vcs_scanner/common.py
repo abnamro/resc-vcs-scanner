@@ -102,9 +102,5 @@ def get_rule_pack_version_from_file(file_content: str) -> str | None:
     return rule_pack_version
 
 
-def join_tag_lists(dest: list[str], src: list[str]) -> list[str]:
-    if not dest:
-        return src
-    if not src:
-        return dest
-    return list(set(dest) | set(src))
+def join_tag_lists(list_a: list[str], list_b: list[str]) -> list[str]:
+    return list(set(list_a) | set(list_b))
