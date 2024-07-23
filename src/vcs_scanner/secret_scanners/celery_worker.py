@@ -10,7 +10,7 @@ from resc_backend.constants import TEMP_RULE_DIR_FILE, TEMP_RULE_FILE, TEMP_RULE
 from resc_backend.resc_web_service.schema.repository import Repository
 
 # First Party
-from vcs_scanner.common import initialise_logs, load_vcs_instances
+from vcs_scanner.common import initialise_logs, load_vcs_instances, tag_list_addition
 from vcs_scanner.constants import LOG_FILE_PATH
 from vcs_scanner.helpers.environment_wrapper import validate_environment
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
@@ -90,9 +90,18 @@ def scan_repository(repository):
         )
         # Split the include_tags by comma if supplied
         include_tags = env_variables[RESC_INCLUDE_TAGS].split(",") if env_variables[RESC_INCLUDE_TAGS] else None
+        include_tags = tag_list_addition(include_tags, vcs_instance.include_tags)
 
         # Split the ignore_tags by comma if supplied
         ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
+        ignore_tags = tag_list_addition(ignore_tags, vcs_instance.ignore_tags)
+
+        logger.debug(
+            f"include_tags for vcs {repository_runtime.vcs_instance_name}: "
+            f"{include_tags}, "
+            f"ignore_tags for vcs {repository_runtime.vcs_instance_name}: "
+            f"{ignore_tags}"
+        )
 
         rule_tag_provider = RuleTagProvider()
         rule_tag_provider.load(TEMP_RULE_FILE)
