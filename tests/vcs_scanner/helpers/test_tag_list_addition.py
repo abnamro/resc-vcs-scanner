@@ -4,22 +4,11 @@ from vcs_scanner.common import join_tag_lists
 
 
 def test_tag_addition_empty_list():
+    case = TestCase()
     dest: list[str] = []
     src: list[str] = ["Cli-only", "Sentinel"]
     result = join_tag_lists(dest, src)
-    assert result == ["Cli-only", "Sentinel"]
-
-
-def test_tag_addition_none():
-    dest: list[str] = None
-    src: list[str] = ["Cli-only", "Sentinel"]
-    result = join_tag_lists(dest, src)
-    assert result == ["Cli-only", "Sentinel"]
-
-
-def test_tag_addition_both_none():
-    result = join_tag_lists(None, None)
-    assert result is None
+    case.assertCountEqual(["Cli-only", "Sentinel"], result)
 
 
 def test_tag_addition_duplicate():

@@ -10,7 +10,7 @@ from resc_backend.constants import TEMP_RULE_DIR_FILE, TEMP_RULE_FILE, TEMP_RULE
 from resc_backend.resc_web_service.schema.repository import Repository
 
 # First Party
-from vcs_scanner.common import initialise_logs, load_vcs_instances, join_tag_lists
+from vcs_scanner.common import initialise_logs, join_tag_lists, load_vcs_instances
 from vcs_scanner.constants import LOG_FILE_PATH
 from vcs_scanner.helpers.environment_wrapper import validate_environment
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
