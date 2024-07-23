@@ -90,9 +90,18 @@ def scan_repository(repository):
         )
         # Split the include_tags by comma if supplied
         include_tags = env_variables[RESC_INCLUDE_TAGS].split(",") if env_variables[RESC_INCLUDE_TAGS] else None
+        include_tags = list(set(include_tags) | set(vcs_instance.include_tags))
 
         # Split the ignore_tags by comma if supplied
         ignore_tags = env_variables[RESC_IGNORE_TAGS].split(",") if env_variables[RESC_IGNORE_TAGS] else None
+        ignore_tags = list(set(ignore_tags) | set(vcs_instance.ignore_tags))
+
+        logger.debug(
+            f"include_tags for vcs {repository_runtime.vcs_instance_name}: "
+            f"{include_tags}, "
+            f"ignore_tags for vcs {repository_runtime.vcs_instance_name}: "
+            f"{ignore_tags}"
+        )
 
         rule_tag_provider = RuleTagProvider()
         rule_tag_provider.load(TEMP_RULE_FILE)

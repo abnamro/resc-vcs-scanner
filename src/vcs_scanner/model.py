@@ -43,6 +43,8 @@ class VCSInstanceRuntime(BaseModel):
     exceptions: list[str] | None = []
     scope: list[str] | None = []
     organization: str | None = None
+    include_tags: list[str] = []
+    ignore_tags: list[str] = []
 
     @field_validator("scheme", mode="before")
     @classmethod
@@ -88,3 +90,11 @@ class VCSInstanceRuntime(BaseModel):
                 "could not be found in the environment variable {value}"
             )
         return os.environ.get(value, "")
+
+    @field_validator("include_tags", "ignore_tags", mode="before")
+    @classmethod
+    def check_tag_list(cls, value, validation_info):
+        if not value:
+            logger.debug(f"[{validation_info.field_name}] empty for VCS [{validation_info.data['name']}].")
+            return []
+        return value
