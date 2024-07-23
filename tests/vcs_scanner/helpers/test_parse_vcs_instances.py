@@ -2,7 +2,7 @@ from copy import deepcopy
 from re import sub
 from unittest import TestCase
 
-from vcs_scanner.input_parser import parse_vcs_instances_contents
+from vcs_scanner.input_parser import _parse_vcs_instances_contents
 from vcs_scanner.model import VCSInstanceRuntime
 
 vcs_instances_json_base = """
@@ -50,7 +50,7 @@ def test_parse_vcs_instances_null():
         vcs_instances_json_base,
     )
 
-    result = parse_vcs_instances_contents(vcs_instances_json_null, vcs_instances_actual)
+    result = _parse_vcs_instances_contents(vcs_instances_json_null, vcs_instances_actual)
 
     case: TestCase = TestCase()
     case.assertCountEqual(vcs_instances_expected_base, vcs_instances_actual)
@@ -67,7 +67,7 @@ def test_parse_vcs_instances_empty_tag_lists():
         vcs_instances_json_base,
     )
 
-    result = parse_vcs_instances_contents(vcs_instances_json_empty, vcs_instances_actual)
+    result = _parse_vcs_instances_contents(vcs_instances_json_empty, vcs_instances_actual)
 
     case: TestCase = TestCase()
     case.assertCountEqual(vcs_instances_expected_base, vcs_instances_actual)
@@ -76,7 +76,7 @@ def test_parse_vcs_instances_empty_tag_lists():
 
 def test_parse_vcs_instances_no_tag_lists():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
-    result = parse_vcs_instances_contents(vcs_instances_json_base, vcs_instances_actual)
+    result = _parse_vcs_instances_contents(vcs_instances_json_base, vcs_instances_actual)
 
     case: TestCase = TestCase()
     case.assertCountEqual(vcs_instances_expected_base, vcs_instances_actual)
@@ -96,7 +96,7 @@ def test_parse_vcs_instances():
     vcs_instances_expected_full[0].include_tags = ["Cli-only", "Github", "Azure"]
     vcs_instances_expected_full[0].ignore_tags = ["Bitbucket", "Sentinel"]
 
-    result = parse_vcs_instances_contents(vcs_instances_json_full, vcs_instances_actual)
+    result = _parse_vcs_instances_contents(vcs_instances_json_full, vcs_instances_actual)
 
     case: TestCase = TestCase()
     case.assertCountEqual(vcs_instances_expected_full, vcs_instances_actual)

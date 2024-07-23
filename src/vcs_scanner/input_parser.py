@@ -12,7 +12,7 @@ from vcs_scanner.model import VCSInstanceRuntime
 logger = logging.getLogger(__name__)
 
 
-def parse_vcs_instances_contents(contents: str, vcs_instances: list[VCSInstanceRuntime]) -> bool:
+def _parse_vcs_instances_contents(contents: str, vcs_instances: list[VCSInstanceRuntime]) -> bool:
     parsed_vcs_instances = json.loads(contents)
     for vcs_instance in parsed_vcs_instances:
         try:
@@ -31,7 +31,7 @@ def parse_vcs_instances_file(filepath: str) -> list[VCSInstanceRuntime]:
     try:
         with open(filepath, encoding="utf-8") as vcs_instances_file:
             logging.info(f"Parsing VCS instance definitions from file {filepath}")
-            errors_found = parse_vcs_instances_contents(vcs_instances_file.read(), vcs_instances)
+            errors_found = _parse_vcs_instances_contents(vcs_instances_file.read(), vcs_instances)
 
     except JSONDecodeError as json_error:
         logger.error(f"Failed to parse VCS instances file '{filepath}': {json_error}")
