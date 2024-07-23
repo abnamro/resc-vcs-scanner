@@ -1,8 +1,9 @@
-from vcs_scanner.input_parser import parse_vcs_instances_contents
-from vcs_scanner.model import VCSInstanceRuntime
-from unittest import TestCase
 from copy import deepcopy
 from re import sub
+from unittest import TestCase
+
+from vcs_scanner.input_parser import parse_vcs_instances_contents
+from vcs_scanner.model import VCSInstanceRuntime
 
 vcs_instances_json_base = """
     {

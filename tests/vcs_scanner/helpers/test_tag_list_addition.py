@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from vcs_scanner.common import tag_list_addition
 
 
