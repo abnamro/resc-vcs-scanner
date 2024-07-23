@@ -107,4 +107,4 @@ def _tag_list_addition(dest: list[str], src: list[str]) -> list[str]:
         return src
     if not src:
         return dest
-    return dest + [tag for tag in src if tag not in dest]
+    return list(set(dest) | set(src))
