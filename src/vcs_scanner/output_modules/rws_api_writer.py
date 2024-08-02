@@ -49,8 +49,8 @@ class RESTAPIWriter(OutputModule):
     def __init__(
         self,
         rws_url,
-        ignore_tags: list[str] = None,
-        include_tags: list[str] = None,
+        ignore_tags: list[str] = [],
+        include_tags: list[str] = [],
         rule_tag_provider: RuleTagProvider = RuleTagProvider(),
     ):
         self.rws_url = rws_url
