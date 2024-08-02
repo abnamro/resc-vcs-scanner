@@ -5,8 +5,8 @@ from resc_backend.resc_web_service.schema.finding import FindingCreate
 def should_process_finding(
     finding: FindingCreate,
     rule_tags: dict = None,
-    include_tags: list[str] = None,
-    ignore_tags: list[str] = None,
+    include_tags: list[str] = [],
+    ignore_tags: list[str] = [],
 ) -> bool:
     """
         Determine the action to take for the finding, based on the rule tags
