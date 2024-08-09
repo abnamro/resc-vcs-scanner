@@ -107,6 +107,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
                 # If the pipe does not succeed we exit immediately.
                 if not pipe():
                     return
+        except SystemExit:
+            raise
         except BaseException:
             logger.error(f"An error occurred while scanning {self.repository.repository_name}")
         finally:
