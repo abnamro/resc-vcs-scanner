@@ -18,6 +18,7 @@ from resc_backend.resc_web_service.schema.scan_type import ScanType
 # First Party
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.output_modules.output_module import OutputModule
+from vcs_scanner.post_processing.post_processor import PostProcessor
 from vcs_scanner.resc_worker import RESCWorker
 from vcs_scanner.secret_scanners.git_operation import clone_repository
 from vcs_scanner.secret_scanners.gitleaks_wrapper import GitLeaksWrapper
@@ -37,6 +38,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         gitleaks_rules_provider: RuleFileProvider,
         rule_pack_version: str,
         output_plugin: OutputModule,
+        post_processor: PostProcessor,
         repository: Repository,
         username: str,
         personal_access_token: str,
@@ -50,6 +52,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self.gitleaks_binary_path: str = gitleaks_binary_path
         self.rule_pack_version: str = rule_pack_version
         self._output_module: OutputModule = output_plugin
+        self._post_processor: PostProcessor = post_processor
         self._scan_tmp_directory: str = scan_tmp_directory
         self.repository: Repository = repository
         self.username: str = username
@@ -99,6 +102,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             self._run_repo_scan,
             self._run_dir_scan,
             self._merge_findings,
+            self._post_processing,
             self._write_findings,
         ]
 
@@ -376,6 +380,16 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             scan_findings=self._findings,
             repository_name=self.repository.repository_name,
         )
+        return True
+
+    def _post_processing(self) -> True:
+        logger.debug("Running post processing")
+        try:
+            self._findings = self._post_processor.run(self._findings)
+            logger.info(f"Post processing: {len(self._findings)} findings after processing")
+        except BaseException as ex:
+            logger.error(f"Failed post processing: {ex}")
+            return False
         return True
 
     def _cleaning_up(self) -> True:
