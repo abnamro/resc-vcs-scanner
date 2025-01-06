@@ -38,10 +38,10 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         gitleaks_rules_provider: RuleFileProvider,
         rule_pack_version: str,
         output_plugin: OutputModule,
-        post_processor: PostProcessor,
         repository: Repository,
         username: str,
         personal_access_token: str,
+        post_processor: PostProcessor | None = None,
         scan_tmp_directory: str = ".",
         local_path: str | None = None,
         force_base_scan: bool = False,
@@ -384,6 +384,8 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
 
     def _post_processing(self) -> True:
         logger.debug("Running post processing")
+        if self._post_processor is None:
+            return True
         try:
             self._findings = self._post_processor.run(self._findings)
             logger.info(f"Post processing: {len(self._findings)} findings after processing")
