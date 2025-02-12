@@ -101,23 +101,19 @@ def scan_repository_from_cli():
     args: Namespace = parser.parse_args()
     args = validate_cli_arguments(args)
 
-    if args.verbose:
-        logger_config.setLevel(logging.DEBUG)
-    else:
-        logger_config.setLevel(logging.INFO)
+    logger_config.setLevel(logging.DEBUG if args.verbose else logging.INFO)
 
-    if args.command == "dir":
+    if args.command == "repo" and args.repository_location == "local":
+        logger.info(f"Scanning repository local {args.dir.absolute()}")
+        args.repo_url = fetch_url_from_dot_git_config(args.dir.absolute())
+        args.username = None
+        args.password = None
+    elif args.command == "repo" and args.repository_location == "remote":
+        logger.info(f"Scanning repository remote {args.repo_url}")
+    else:
         logger.info(f"Scanning directory {args.dir.absolute()}")
-        scan_directory(args)
-    elif args.command == "repo":
-        if args.repository_location == "local":
-            logger.info(f"Scanning repository local {args.dir.absolute()}")
-            args.repo_url = fetch_url_from_dot_git_config(args.dir.absolute())
-            args.username = None
-            args.password = None
-        elif args.repository_location == "remote":
-            logger.info(f"Scanning repository remote {args.repo_url}")
-        scan_repository(args)
+
+    scan(args)
 
 
 def fetch_url_from_dot_git_config(path: str):
@@ -126,76 +122,40 @@ def fetch_url_from_dot_git_config(path: str):
 
     return read_repo_from_local(path)
 
-
-# TODO refactor and merge scan_directory / scan_repository to avoid code duplication.
-def scan_directory(args: Namespace):
+def scan(args: Namespace):
     """
-        Start the process of scanning a non-git directory
+        Start the process of scanning something
     :param args:
         Namespace object containing the CLI arguments
     """
-    repository = RepositoryRuntime(
-        repository_url=FAKE_URL,
-        repository_name="local",
-        repository_id="local",
-        project_key="local",
-        vcs_instance_name="vcs_instance_name",
-        latest_commit=FAKE_COMMIT,
-    )
 
-    output_plugin = STDOUTWriter.make(args)
-    rule_pack_version = _get_rule_pack_version(args)
-    post_processor = PostProcessor.make(args)
-
-    if not rule_pack_version:
-        rule_pack_version = "0.0.0"
-
-    gitleaks_rules_provider = RuleFileProvider(args.gitleaks_rules_path, init=True)
-
-    secret_scanner = SecretScanner(
-        gitleaks_binary_path=args.gitleaks_path,
-        gitleaks_rules_provider=gitleaks_rules_provider,
-        rule_pack_version=rule_pack_version,
-        output_plugin=output_plugin,
-        post_processor=post_processor,
-        repository=repository.convert_to_repository(vcs_instance_id=1),
-        username="",
-        personal_access_token="",
-        local_path=f"{args.dir.absolute()}",
-        # we force a base scan because it does not matter
-        # in this use case: we are not sending data to RESC.
-        force_base_scan=True,
-    )
-
-    secret_scanner.run_scan(as_dir=True)
-
-
-def scan_repository(args: Namespace):
-    """
-        Start the process of scanning a git repository (remote or local)
-    :param args:
-        Namespace object containing the CLI arguments
-    """
-    vcs_type = guess_vcs_provider(args.repo_url)
-    vcs_name = determine_vcs_name(args.repo_url, vcs_type)
+    is_repo_scan = True if args.repo_url else False
+    repo_url = args.repo_url if is_repo_scan else FAKE_URL
+    vcs_type = guess_vcs_provider(args.repo_url) if is_repo_scan else "vcs_instance_name"
+    vcs_name = determine_vcs_name(args.repo_url, vcs_type) if is_repo_scan else "local"
+    repo_name = args.repo_name if args.repo_name else "local"
 
     repository = RepositoryRuntime(
-        repository_url=args.repo_url,
-        repository_name=args.repo_name,
-        repository_id=args.repo_name,
-        project_key=args.repo_name,
+        repository_url=repo_url,
+        repository_name=repo_name,
+        repository_id=repo_name,
+        project_key=repo_name,
         vcs_instance_name=vcs_name,
         latest_commit=FAKE_COMMIT,
     )
 
-    if args.rws_url:
-        output_plugin = RESTAPIWriter.make(args)
-        rule_pack_version = output_plugin.download_rule_pack()
-
-    else:
-        output_plugin = STDOUTWriter.make(args)
-        rule_pack_version = _get_rule_pack_version(args)
+    output_plugin = RESTAPIWriter.make(args)
     post_processor = PostProcessor.make(args)
+    username = args.username if args.username else ""
+    personal_access_token = args.password if args.password else ""
+    force_base_scan = args.force_base_scan if force_base_scan else True
+    latest_commit = "unknown" if is_repo_scan else None
+
+    if args.rws_url:
+        rule_pack_version = output_plugin.download_rule_pack()
+    else:
+        rule_pack_version = _get_rule_pack_version(args)
+
     if not rule_pack_version:
         rule_pack_version = "0.0.0"
 
@@ -208,14 +168,18 @@ def scan_repository(args: Namespace):
         output_plugin=output_plugin,
         post_processor=post_processor,
         repository=repository.convert_to_repository(vcs_instance_id=1),
-        username=args.username,
-        personal_access_token=args.password,
+        username=username,
+        personal_access_token=personal_access_token,
         local_path=f"{args.dir.absolute()}",
-        force_base_scan=args.force_base_scan,
-        latest_commit="unknown",
+
+        force_base_scan=force_base_scan,
+        latest_commit=latest_commit,
     )
 
-    secret_scanner.run_scan(as_repo=True)
+    secret_scanner.run_scan(
+        as_repo=is_repo_scan,
+        as_dir=not is_repo_scan)
+
 
 
 def guess_vcs_provider(repo_url: str) -> VCSProviders:
