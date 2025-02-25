@@ -142,3 +142,7 @@ cython_debug/
 
 #Custom commit file
 Dockerfile-no-commit
+
+# AAB configurations
+rootfs/*
+!rootfs/.gitkeep
