@@ -14,7 +14,7 @@ ARG GID=10002
 ARG GITLEAKS_VERSION="8.24.0"
 ARG GITLEAKS_HASH="cb49b7de5ee986510fe8666ca0273a6cc15eb82571f2f14832c9e8920751f3a4" 
 
-# Initialize AAB inner layer
+# Initialize Corporate configurations
 # TODO add any files under rootfs that are needed for proxy settings
 COPY rootfs/ /
 
