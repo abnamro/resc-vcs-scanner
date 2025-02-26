@@ -5,9 +5,10 @@ from unittest.mock import patch
 
 # Third Party
 from _pytest.monkeypatch import MonkeyPatch
-from resc_backend.resc_web_service.schema.repository import Repository
-from resc_backend.resc_web_service.schema.scan import ScanRead
-from resc_backend.resc_web_service.schema.scan_type import ScanType
+
+from vcs_scanner.api.schema.repository import Repository
+from vcs_scanner.api.schema.scan import ScanRead
+from vcs_scanner.api.schema.scan_type import ScanType
 
 # First Party
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider

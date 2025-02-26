@@ -7,33 +7,34 @@ from argparse import Namespace
 from datetime import datetime
 from pathlib import Path
 
+from tenacity import retry, stop_after_attempt, wait_exponential
+
 # Third Party
-from resc_backend.constants import TEMP_RULE_FILE
-from resc_backend.resc_web_service.schema.finding import FindingBase, FindingCreate
-from resc_backend.resc_web_service.schema.repository import (
-    RepositoryCreate,
-    RepositoryRead,
-)
-from resc_backend.resc_web_service.schema.scan import Scan, ScanCreate, ScanRead
-from resc_backend.resc_web_service.schema.scan_type import ScanType
-from resc_backend.resc_web_service.schema.vcs_instance import (
-    VCSInstanceCreate,
-    VCSInstanceRead,
-)
-from resc_backend.resc_web_service_interface.findings import (
+from vcs_scanner.api.constants import TEMP_RULE_FILE
+from vcs_scanner.api.interface.findings import (
     create_findings_with_scan_id,
 )
-from resc_backend.resc_web_service_interface.repositories import (
+from vcs_scanner.api.interface.repositories import (
     create_repository,
     get_last_scan_for_repository,
 )
-from resc_backend.resc_web_service_interface.rule_packs import (
+from vcs_scanner.api.interface.rule_packs import (
     download_rule_pack_toml_file,
     get_rule_packs,
 )
-from resc_backend.resc_web_service_interface.scans import create_scan
-from resc_backend.resc_web_service_interface.vcs_instances import create_vcs_instance
-from tenacity import retry, stop_after_attempt, wait_exponential
+from vcs_scanner.api.interface.scans import create_scan
+from vcs_scanner.api.interface.vcs_instances import create_vcs_instance
+from vcs_scanner.api.schema.finding import FindingBase, FindingCreate
+from vcs_scanner.api.schema.repository import (
+    RepositoryCreate,
+    RepositoryRead,
+)
+from vcs_scanner.api.schema.scan import Scan, ScanCreate, ScanRead
+from vcs_scanner.api.schema.scan_type import ScanType
+from vcs_scanner.api.schema.vcs_instance import (
+    VCSInstanceCreate,
+    VCSInstanceRead,
+)
 
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file
@@ -119,7 +120,7 @@ class RESTAPIWriter(OutputModule):
 
         if response.status_code != 201:
             logger.warning(
-                f"Creating findings for scan {scan_id} " f"failed with error: {response.status_code}->{response.text}"
+                f"Creating findings for scan {scan_id} failed with error: {response.status_code}->{response.text}"
             )
         logger.info(f"Found {len(scan_findings)} issues during scan for scan_id: {scan_id} ")
 
@@ -215,8 +216,7 @@ class RESTAPIWriter(OutputModule):
         filename.write_bytes(response.content)
         if rule_pack_version:
             logger.debug(
-                f"Rule pack version: {rule_pack_version} has been successfully "
-                f"downloaded to location {TEMP_RULE_FILE}"
+                f"Rule pack version: {rule_pack_version} has been successfully downloaded to location {TEMP_RULE_FILE}"
             )
         else:
             rule_pack_version = get_rule_pack_version_from_file(response.content)

@@ -4,13 +4,13 @@ from pathlib import Path
 from unittest.mock import call, patch
 
 # Third Party
-from resc_backend.resc_web_service.schema.finding import Finding
-from resc_backend.resc_web_service.schema.finding_status import FindingStatus
-from resc_backend.resc_web_service.schema.repository import (
+from vcs_scanner.api.schema.finding import Finding
+from vcs_scanner.api.schema.finding_status import FindingStatus
+from vcs_scanner.api.schema.repository import (
     RepositoryCreate,
     RepositoryRead,
 )
-from resc_backend.resc_web_service.schema.scan import ScanRead
+from vcs_scanner.api.schema.scan import ScanRead
 
 # First Party
 from vcs_scanner.helpers.providers.ignore_list import IgnoredListProvider

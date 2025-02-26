@@ -5,7 +5,7 @@ import subprocess
 from datetime import UTC, datetime
 
 # Third Party
-from resc_backend.resc_web_service.schema.finding import FindingBase
+from vcs_scanner.api.schema.finding import FindingBase
 
 # First Party
 from vcs_scanner.constants import LEAKS_FOUND_EXIT_CODE, NO_LEAKS_FOUND_EXIT_CODE

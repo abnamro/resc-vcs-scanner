@@ -10,10 +10,11 @@ from datetime import UTC, datetime
 
 # Third Party
 from git import Commit
-from resc_backend.resc_web_service.schema.finding import FindingBase
-from resc_backend.resc_web_service.schema.repository import Repository, RepositoryBase
-from resc_backend.resc_web_service.schema.scan import Scan, ScanRead
-from resc_backend.resc_web_service.schema.scan_type import ScanType
+
+from vcs_scanner.api.schema.finding import FindingBase
+from vcs_scanner.api.schema.repository import Repository, RepositoryBase
+from vcs_scanner.api.schema.scan import Scan, ScanRead
+from vcs_scanner.api.schema.scan_type import ScanType
 
 # First Party
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
@@ -280,7 +281,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
             return findings
         except BaseException as error:
             logger.error(
-                f"An exception occurred while scanning repository {self.repository.repository_url} " f"error: {error}"
+                f"An exception occurred while scanning repository {self.repository.repository_url} error: {error}"
             )
             return []
         finally:
@@ -304,8 +305,7 @@ class SecretScanner(RESCWorker):  # pylint: disable=R0902
         self._findings_from_dir = self._scan_directory(self._repo_clone_path)
         scan_timestamp_end = datetime.now(UTC)
         logger.info(
-            f"Running directory scan on {self._repo_clone_path}"
-            f" took {scan_timestamp_end - scan_timestamp_start} ms."
+            f"Running directory scan on {self._repo_clone_path} took {scan_timestamp_end - scan_timestamp_start} ms."
         )
         return True
 

@@ -3,8 +3,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 # Third Party
-from resc_backend.resc_web_service.schema.finding import Finding
-from resc_backend.resc_web_service.schema.finding_status import FindingStatus
+from vcs_scanner.api.schema.finding import Finding
+from vcs_scanner.api.schema.finding_status import FindingStatus
 
 # First Party
 from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider

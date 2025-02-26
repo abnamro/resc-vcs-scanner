@@ -7,7 +7,7 @@ from argparse import ArgumentParser, Namespace
 from urllib.parse import urlparse
 
 # Third Party
-from resc_backend.resc_web_service.schema.vcs_provider import VCSProviders
+from vcs_scanner.api.schema.vcs_provider import VCSProviders
 
 # First Party
 from vcs_scanner.common import get_rule_pack_version_from_file, initialise_logs

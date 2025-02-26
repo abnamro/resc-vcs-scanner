@@ -17,7 +17,7 @@ def create_cli_argparser() -> ArgumentParser:
         action=EnvDefault,
         envvar="RESC_GITLEAKS_PATH",
         required=True,
-        help="Path to the gitleaks binary. " "Can also be set via the RESC_GITLEAKS_PATH environment variable",
+        help="Path to the gitleaks binary. Can also be set via the RESC_GITLEAKS_PATH environment variable",
     )
     parser_common.add_argument(
         "--gitleaks-rules-path",
@@ -25,9 +25,7 @@ def create_cli_argparser() -> ArgumentParser:
         action=EnvDefault,
         required=True,
         envvar="RESC_GITLEAKS_RULES_PATH",
-        help="Path to the gitleaks rules file. "
-        "Can also be set via the "
-        "RESC_GITLEAKS_RULES_PATH environment variable",
+        help="Path to the gitleaks rules file. Can also be set via the RESC_GITLEAKS_RULES_PATH environment variable",
     )
     parser_common.add_argument(
         "--ignored-blocker-path",
@@ -35,10 +33,7 @@ def create_cli_argparser() -> ArgumentParser:
         action=EnvDefault,
         required=False,
         envvar="RESC_IGNORED_BLOCKER_PATH",
-        help="Path to the resc-ignore.dsv file. "
-        "Can also be set via the "
-        "RESC_IGNORED_BLOCKER_PATH "
-        "environment variable",
+        help="Path to the resc-ignore.dsv file. Can also be set via the RESC_IGNORED_BLOCKER_PATH environment variable",
     )
     parser_common.add_argument(
         "-w",
@@ -97,7 +92,7 @@ def create_cli_argparser() -> ArgumentParser:
         required=False,
         action=EnvDefault,
         envvar="RESC_REPO_NAME",
-        help="The name of the repository. " "Can also be set via the RESC_REPO_NAME environment variable",
+        help="The name of the repository. Can also be set via the RESC_REPO_NAME environment variable",
     )
     repository_common.add_argument("--force-base-scan", required=False, action="store_true")
 
@@ -168,7 +163,7 @@ def create_cli_argparser() -> ArgumentParser:
         required=True,
         action=EnvDefault,
         envvar="RESC_REPO_URL",
-        help="url to repository you want to scan. " "Can also be set via the RESC_REPO_URL environment variable",
+        help="url to repository you want to scan. Can also be set via the RESC_REPO_URL environment variable",
     )
     repository_remote.add_argument(
         "--username",

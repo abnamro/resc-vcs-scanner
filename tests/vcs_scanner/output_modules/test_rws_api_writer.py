@@ -6,14 +6,15 @@ from unittest.mock import patch
 
 # Third Party
 import pytest
-from resc_backend.resc_web_service.schema.finding import Finding
-from resc_backend.resc_web_service.schema.finding_status import FindingStatus
-from resc_backend.resc_web_service.schema.repository import (
+
+from vcs_scanner.api.schema.finding import Finding
+from vcs_scanner.api.schema.finding_status import FindingStatus
+from vcs_scanner.api.schema.repository import (
     RepositoryCreate,
     RepositoryRead,
 )
-from resc_backend.resc_web_service.schema.scan import ScanRead
-from resc_backend.resc_web_service.schema.scan_type import ScanType
+from vcs_scanner.api.schema.scan import ScanRead
+from vcs_scanner.api.schema.scan_type import ScanType
 
 # First Party
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
@@ -125,7 +126,7 @@ def test_write_findings_unsuccessful(warning, post):
 
     _ = RESTAPIWriter(rws_url=url).write_findings(1, 1, findings)
     warning.assert_called_once()
-    warning.assert_called_with(f"Creating findings for scan {1} " f"failed with error: {400}->{0}")
+    warning.assert_called_with(f"Creating findings for scan {1} failed with error: {400}->{0}")
 
 
 @patch("requests.post")

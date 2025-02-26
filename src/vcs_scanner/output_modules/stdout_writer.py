@@ -6,12 +6,13 @@ from datetime import UTC, datetime
 
 # Third Party
 from prettytable import PrettyTable
-from resc_backend.resc_web_service.schema.finding import FindingCreate
-from resc_backend.resc_web_service.schema.repository import Repository
-from resc_backend.resc_web_service.schema.scan import ScanRead
-from resc_backend.resc_web_service.schema.scan_type import ScanType
-from resc_backend.resc_web_service.schema.vcs_instance import VCSInstanceRead
 from termcolor import colored
+
+from vcs_scanner.api.schema.finding import FindingCreate
+from vcs_scanner.api.schema.repository import Repository
+from vcs_scanner.api.schema.scan import ScanRead
+from vcs_scanner.api.schema.scan_type import ScanType
+from vcs_scanner.api.schema.vcs_instance import VCSInstanceRead
 
 # First Party
 from vcs_scanner.helpers.finding_action import FindingAction
@@ -218,7 +219,7 @@ class STDOUTWriter(OutputModule):
         logger.info(f"\n{output_table.get_string(sortby='Level')}")
 
         logger.info(
-            f"Findings detected : Total - {block_count+warn_count+info_count}, Block - {block_count}, "
+            f"Findings detected : Total - {block_count + warn_count + info_count}, Block - {block_count}, "
             f"Warn - {warn_count}, Info - {info_count}"
         )
 

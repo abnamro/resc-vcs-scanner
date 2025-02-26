@@ -6,8 +6,9 @@ from typing import Annotated
 
 # Third Party
 from pydantic import BaseModel, Field, StringConstraints, field_validator
-from resc_backend.resc_web_service.schema.repository import Repository
-from resc_backend.resc_web_service.schema.vcs_provider import VCSProviders
+
+from vcs_scanner.api.schema.repository import Repository
+from vcs_scanner.api.schema.vcs_provider import VCSProviders
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +87,7 @@ class VCSInstanceRuntime(BaseModel):
     def check_presence_of_token(cls, value, values):
         if not os.environ.get(value, ""):
             logger.info(
-                f"Token for VCS Instance {values.data['name']} "
-                "could not be found in the environment variable {value}"
+                f"Token for VCS Instance {values.data['name']} could not be found in the environment variable {{value}}"
             )
         return os.environ.get(value, "")
 

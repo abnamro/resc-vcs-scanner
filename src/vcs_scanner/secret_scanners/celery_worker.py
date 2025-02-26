@@ -6,8 +6,9 @@ import os
 # Third Party
 from celery import Celery
 from celery.utils.log import get_task_logger
-from resc_backend.constants import TEMP_RULE_DIR_FILE, TEMP_RULE_FILE, TEMP_RULE_REPO_FILE
-from resc_backend.resc_web_service.schema.repository import Repository
+
+from vcs_scanner.api.constants import TEMP_RULE_DIR_FILE, TEMP_RULE_FILE, TEMP_RULE_REPO_FILE
+from vcs_scanner.api.schema.repository import Repository
 
 # First Party
 from vcs_scanner.common import initialise_logs, load_vcs_instances
