@@ -41,4 +41,3 @@ class FindingRead(FindingCreate):
     id_: Annotated[int, Field(gt=0)]
     scan_ids: Annotated[list[Annotated[int, Field(gt=0)]], Field(min_length=None, max_length=sys.maxsize)] | None = None
     model_config = ConfigDict(from_attributes=True)
-
