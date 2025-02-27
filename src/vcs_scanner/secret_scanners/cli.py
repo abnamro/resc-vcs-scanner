@@ -21,7 +21,6 @@ from vcs_scanner.helpers.cli import create_cli_argparser
 from vcs_scanner.helpers.providers.rule_file import RuleFileProvider
 from vcs_scanner.model import RepositoryRuntime
 from vcs_scanner.output_modules.rws_api_writer import RESTAPIWriter
-from vcs_scanner.output_modules.stdout_writer import STDOUTWriter
 from vcs_scanner.post_processing.post_processor import PostProcessor
 from vcs_scanner.secret_scanners.git_operation import read_repo_from_local
 from vcs_scanner.secret_scanners.secret_scanner import SecretScanner
@@ -122,6 +121,7 @@ def fetch_url_from_dot_git_config(path: str):
 
     return read_repo_from_local(path)
 
+
 def scan(args: Namespace):
     """
         Start the process of scanning something
@@ -148,7 +148,7 @@ def scan(args: Namespace):
     post_processor = PostProcessor.make(args)
     username = args.username if args.username else ""
     personal_access_token = args.password if args.password else ""
-    force_base_scan = args.force_base_scan if force_base_scan else True
+    force_base_scan = args.force_base_scan if args.force_base_scan else True
     latest_commit = "unknown" if is_repo_scan else None
 
     if args.rws_url:
@@ -171,15 +171,11 @@ def scan(args: Namespace):
         username=username,
         personal_access_token=personal_access_token,
         local_path=f"{args.dir.absolute()}",
-
         force_base_scan=force_base_scan,
         latest_commit=latest_commit,
     )
 
-    secret_scanner.run_scan(
-        as_repo=is_repo_scan,
-        as_dir=not is_repo_scan)
-
+    secret_scanner.run_scan(as_repo=is_repo_scan, as_dir=not is_repo_scan)
 
 
 def guess_vcs_provider(repo_url: str) -> VCSProviders:
