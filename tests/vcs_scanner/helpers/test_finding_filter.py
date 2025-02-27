@@ -2,8 +2,8 @@
 from datetime import UTC, datetime
 
 # Third Party
-from resc_backend.resc_web_service.schema.finding import FindingCreate
-from resc_backend.resc_web_service.schema.finding_status import FindingStatus
+from vcs_scanner.api.schema.finding import FindingCreate
+from vcs_scanner.api.schema.finding_status import FindingStatus
 
 # First Party
 from vcs_scanner.helpers.finding_filter import should_process_finding

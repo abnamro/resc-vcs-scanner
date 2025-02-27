@@ -3,7 +3,7 @@ import abc
 from enum import Enum
 
 # Third Party
-from resc_backend.resc_web_service.schema.finding import FindingBase
+from vcs_scanner.api.schema.finding import FindingBase
 
 
 class PostProcessingStatus(Enum):

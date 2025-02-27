@@ -2,11 +2,11 @@
 import abc
 
 # Third Party
-from resc_backend.resc_web_service.schema.finding import FindingCreate
-from resc_backend.resc_web_service.schema.repository import Repository, RepositoryBase
-from resc_backend.resc_web_service.schema.scan import Scan, ScanRead
-from resc_backend.resc_web_service.schema.scan_type import ScanType
-from resc_backend.resc_web_service.schema.vcs_instance import VCSInstanceRead
+from vcs_scanner.api.schema.finding import FindingCreate
+from vcs_scanner.api.schema.repository import Repository, RepositoryBase
+from vcs_scanner.api.schema.scan import Scan, ScanRead
+from vcs_scanner.api.schema.scan_type import ScanType
+from vcs_scanner.api.schema.vcs_instance import VCSInstanceRead
 
 # First Party
 from vcs_scanner.model import VCSInstanceRuntime

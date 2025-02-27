@@ -1,7 +1,6 @@
 from argparse import Namespace
 
-from resc_backend.resc_web_service.schema.finding import FindingBase
-
+from vcs_scanner.api.schema.finding import FindingBase
 from vcs_scanner.helpers.providers.rule_tag import RuleTagProvider
 from vcs_scanner.post_processing.processor_interface import PostProcessingStatus, Processor
 

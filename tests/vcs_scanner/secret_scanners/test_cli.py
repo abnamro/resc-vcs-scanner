@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from pathlib import PosixPath
 
 # Third Party
-from resc_backend.resc_web_service.schema.vcs_provider import VCSProviders
+from vcs_scanner.api.schema.vcs_provider import VCSProviders
 
 # First Party
 from vcs_scanner.constants import CLI_VCS_AZURE, CLI_VCS_BITBUCKET, CLI_VCS_LOCAL_SCAN

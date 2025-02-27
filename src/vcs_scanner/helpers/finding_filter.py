@@ -1,5 +1,5 @@
 # Third Party
-from resc_backend.resc_web_service.schema.finding import FindingCreate
+from vcs_scanner.api.schema.finding import FindingCreate
 
 
 def should_process_finding(
