@@ -1,13 +1,13 @@
 # Standard Library
 import os
 from pathlib import Path
+from unittest import mock
 
 # Third Party
 import pytest
-from mock import mock
 
 # First Party
-from vcs_scanner.common import load_vcs_instances, get_rule_pack_version_from_file
+from vcs_scanner.common import get_rule_pack_version_from_file, load_vcs_instances
 
 read_data = "{}"
 mock_open = mock.mock_open(read_data=read_data)
@@ -18,8 +18,8 @@ THIS_DIR = Path(__file__).parent
 def test_parse_vcs_instances_file():
     my_data_path = THIS_DIR.parent / "fixtures/working_vcs_instances.json"
     with mock.patch.dict(
-            os.environ,
-            {"VCS_INSTANCE_TOKEN": "token123", "VCS_INSTANCE_USERNAME": "user123"},
+        os.environ,
+        {"VCS_INSTANCE_TOKEN": "token123", "VCS_INSTANCE_USERNAME": "user123"},
     ):
         vcs_instances = load_vcs_instances(str(my_data_path))
     assert vcs_instances.get("vcs_instance_1").provider_type == "AZURE_DEVOPS"
@@ -50,6 +50,7 @@ def test_parse_vcs_instances_file_with_missing_org():
     with pytest.raises(SystemExit) as pytest_wrapped_e:
         load_vcs_instances(str(my_data_path))
         assert pytest_wrapped_e.value.code == -1
+
 
 def test_get_rule_pack_version_from_file():
     rules_path = THIS_DIR.parent / "fixtures/rules.toml"

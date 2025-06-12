@@ -1,11 +1,10 @@
 import os
 from copy import deepcopy
-from re import sub
-from unittest import TestCase
 from pathlib import Path
+from re import sub
 
 # Third Party
-from mock import mock
+from unittest import TestCase, mock
 
 # First Party
 from vcs_scanner.input_parser import _parse_vcs_instances_contents, parse_vcs_instances_file
@@ -48,6 +47,7 @@ read_data = "{}"
 mock_open = mock.mock_open(read_data=read_data)
 
 THIS_DIR = Path(__file__).parent
+
 
 def test_parse_vcs_instances_null():
     vcs_instances_actual: list[VCSInstanceRuntime] = []
@@ -112,12 +112,11 @@ def test_parse_vcs_instances():
     assert result is False
 
 
-
 def test_parse_vcs_instances_file():
     my_data_path = THIS_DIR.parent / "fixtures/working_vcs_instances.json"
     with mock.patch.dict(
-            os.environ,
-            {"VCS_INSTANCE_TOKEN": "token123", "VCS_INSTANCE_USERNAME": "user123"},
+        os.environ,
+        {"VCS_INSTANCE_TOKEN": "token123", "VCS_INSTANCE_USERNAME": "user123"},
     ):
         vcs_instances = parse_vcs_instances_file(str(my_data_path))
     assert vcs_instances[0].provider_type == "AZURE_DEVOPS"
