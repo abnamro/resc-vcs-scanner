@@ -269,7 +269,7 @@ def test__cleaning_up_invalid_path(error, info):
 @patch("logging.Logger.debug")
 @patch("shutil.rmtree")
 @patch("os.path.exists")
-def test__cleaning_up_invalid_path(path_exists, rmtree, debug, info):
+def test__cleaning_up_valid_path(path_exists, rmtree, debug, info):
     path_exists.return_value = True
     secret_scanner = initialize_and_get_repo_scanner()
     test_path = "/this/shouldnt/exist"
