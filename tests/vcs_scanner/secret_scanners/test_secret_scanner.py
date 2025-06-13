@@ -6,6 +6,7 @@ from unittest.mock import patch
 # Third Party
 from _pytest.monkeypatch import MonkeyPatch
 
+from vcs_scanner.api.schema.finding import Finding, FindingBase
 from vcs_scanner.api.schema.repository import Repository
 from vcs_scanner.api.schema.scan import ScanRead
 from vcs_scanner.api.schema.scan_type import ScanType
@@ -312,3 +313,63 @@ def test__start_timer():
     secret_scanner._scan_timestamp_start = None
     secret_scanner._start_timer()
     assert secret_scanner._scan_timestamp_start < datetime.now(UTC)
+
+
+@patch("vcs_scanner.output_modules.rws_api_writer.RESTAPIWriter.write_findings")
+def test__write_findings(write_findings):
+    secret_scanner = initialize_and_get_repo_scanner()
+    secret_scanner._output_module = RESTAPIWriter(rws_url="")
+    secret_scanner._write_findings()
+    write_findings.assert_called_once_with(repository_id=0, scan_id=0, scan_findings=[], repository_name="local")
+
+
+def test__populate_if_empty():
+    secret_scanner = initialize_and_get_repo_scanner()
+    finding = FindingBase(
+        file_path="file_path_1",
+        line_number=1,
+        column_start=1,
+        column_end=1,
+        commit_id="",
+        commit_message="",
+        commit_timestamp=datetime.now(UTC),
+        author="",
+        email="email",
+        rule_name="rule_1",
+    )
+    secret_scanner._populate_if_empty(finding)
+    assert finding.commit_id == "unknown"
+    assert finding.commit_message == ""
+    assert finding.author == "vcs-scanner"
+
+
+@patch("logging.Logger.info")
+def test__merge_findings_empty(info):
+    secret_scanner = initialize_and_get_repo_scanner()
+    assert not secret_scanner._merge_findings()
+    info.assert_called_with("No findings registered in local/local.")
+
+
+def test__merge_findings():
+    findings = []
+    for i in range(1, 7):
+        findings.append(
+            Finding(
+                file_path=f"file_path_{i}",
+                line_number=i,
+                column_start=i,
+                column_end=i,
+                commit_id=f"commit_id_{i}",
+                commit_message=f"commit_message_{i}",
+                commit_timestamp=datetime.now(UTC),
+                author=f"author_{i}",
+                email=f"email_{i}",
+                event_sent_on=datetime.now(UTC),
+                rule_name=f"rule_{i}",
+            )
+        )
+    secret_scanner = initialize_and_get_repo_scanner()
+    secret_scanner._findings_from_dir = findings[3:6]
+    secret_scanner._findings_from_repo = findings[0:3]
+    assert secret_scanner._merge_findings()
+    assert secret_scanner._findings == findings
