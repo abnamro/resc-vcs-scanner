@@ -2,7 +2,7 @@
 ARG SOURCE_REGISTRY
 
 # Dockerfile for building the VCS-scanner using a localy build version of the backend
-FROM ${SOURCE_REGISTRY}python:3.12-alpine3.20
+FROM ${SOURCE_REGISTRY}python:3.12-alpine3.22
 
 ARG NAME="resc-vcs-scanner"
 ARG DESCRIPTION="RESC Version Control System Scanner"
