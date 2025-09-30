@@ -1,5 +1,5 @@
 # Standard Library
-from typing import Annotated, Generic, TypeVar
+from typing import Annotated, TypeVar
 
 # Third Party
 # pylint: disable=no-name-in-module
@@ -11,7 +11,7 @@ from vcs_scanner.api.constants import MAX_RECORDS_PER_PAGE_LIMIT
 Model = TypeVar("Model", bound=BaseModel)
 
 
-class PaginationModel(BaseModel, Generic[Model]):
+class PaginationModel[Model: BaseModel](BaseModel):
     """
         Generic encapsulation class for paginated endpoints to standardize output of the API
         example creation, PaginationModel[FindingRead](data=db_findings, total=total, limit=limit, skip=skip)
